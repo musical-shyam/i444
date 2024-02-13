@@ -45,9 +45,14 @@ export function makeLendingLibrary() {
 export class LendingLibrary {
 
   //TODO: declare private TS properties for instance
+  private Book: Book;
+  private patron: PatronId;
   
   constructor() {
     //TODO: initialize private TS properties for instance
+    let ISBN = "";
+    this.Book = {isbn: '', title: "", authors: [""], pages: 0, year: 0, publisher: "", nCopies: 1};
+    this.patron = "";
   }
 
   /** Add one-or-more copies of book represented by req to this library.
