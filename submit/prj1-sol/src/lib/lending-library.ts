@@ -1,4 +1,6 @@
 import { Errors } from 'cs544-js-utils';
+import { errResult } from 'cs544-js-utils/dist/lib/errors';
+import { argv0 } from 'process';
 
 /** Note that errors are documented using the `code` option which must be
  *  returned (the `message` can be any suitable string which describes
@@ -45,14 +47,17 @@ export function makeLendingLibrary() {
 export class LendingLibrary {
 
   //TODO: declare private TS properties for instance
-  private Book: Book;
-  private patron: PatronId;
+  private books : Record<ISBN, XBook>; //a dictionary of books
+  private bookPatron: Record<ISBN, PatronId[]>; // stores Patron that took a particular book
+  private patronArray: Record<PatronId, ISBN[]>; // stores the books that a patron has taken
+  private find: Record<string, ISBN[]>; // stores an array of bookId where a word has occured
   
   constructor() {
     //TODO: initialize private TS properties for instance
-    let ISBN = "";
-    this.Book = {isbn: '', title: "", authors: [""], pages: 0, year: 0, publisher: "", nCopies: 1};
-    this.patron = "";
+    this.books = {};//all are empty dictionaries intially
+    this.bookPatron = {};
+    this.patronArray = {};
+    this.find ={};
   }
 
   /** Add one-or-more copies of book represented by req to this library.
@@ -66,7 +71,41 @@ export class LendingLibrary {
    */
   addBook(req: Record<string, any>): Errors.Result<XBook> {
     //TODO
-    return Errors.errResult('TODO');  //placeholder
+    const reqFields = ['isbn', 'title', 'authors', 'pages', 'year', 'publisher'];//as all keys in dict are string
+    for(const x of reqFields){//using the for loop to check if all the required field are their
+      if(req[x] === undefined){
+        return Errors.errResult(': property ${x} is required; widget=', 'MISSING',x);
+      }
+    }
+    if (typeof req.isbn !== 'string'){
+      return Errors.errResult(': property ${x} must be string, widget=','BAD_TYPE', 'isbn');
+    }
+    else if (typeof req.title !== 'string'){
+      return Errors.errResult(': property ${x} must be string, widget=','BAD_TYPE', 'title');
+    } 
+    else if (!Array.isArray(req.authors) || req.authors.some(author => typeof author !== 'string')){
+      return Errors.errResult(': property ${x} must be type string[]; widget=','BAD_TYPE', 'authors');
+    } 
+    else if(req.authors.length === 0){
+      return Errors.errResult(': property ${x} is empty; widget=','BAD_TYPE', 'authors');
+    }
+    else if (typeof req.publisher !== 'string') {
+      return Errors.errResult(': property ${x} must be string; widget=','BAD_TYPE', 'publisher');
+    } 
+    if (req["nCopies"] === undefined) {
+      req['nCopies'] = 1;
+    }
+    const NUMERIC_FIELDS = [ 'pages', 'year', 'nCopies' ];
+    for (const x of NUMERIC_FIELDS){
+      if (typeof req[x] !== 'number'){
+        return Errors.errResult(': property ${x} must be numeric; widget=','BAD_TYPE', x);
+      }
+      if(req[x] < 1 || !Number.isInteger(req[x])){
+        return Errors.errResult(': property ${x} must be greater than 0, widget=','BAD_REQ', x);
+      }
+    }
+    this.books[req['isbn']] = req as XBook;
+    return Errors.okResult(this.books[req.isbn]);//placeholder
   }
 
   /** Return all books matching (case-insensitive) all "words" in
@@ -119,4 +158,6 @@ export class LendingLibrary {
 /********************* General Utility Functions ***********************/
 
 //TODO: add general utility functions or classes.
+function Missing(){
 
+}
