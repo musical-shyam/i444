@@ -161,33 +161,38 @@ export class LendingLibrary {
    *    BAD_TYPE: patronId or isbn field is not a string.
    *    BAD_REQ error on business rule violation.
    */
-  checkoutBook(req: Record<string, any>) : Errors.Result<void> {
+  checkoutBook(req: CheckoutBookReq) : Errors.Result<void> {
     //TODO
     if(req.patronId === undefined){
-      return Errors.errResult(': property patronId is required; widget=', "MISSING",'=patronId');
+      return Errors.errResult(': property patronId is required; widget=', "MISSING",'patronId');
     }
     else if(req.isbn === undefined){
-      return Errors.errResult(': property isbn is required; widget=', "MISSING",'=isbn');
+      return Errors.errResult(': property isbn is required; widget=', "MISSING",'isbn');
     }
     else if (typeof req.patronId !== 'string'){
-      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','=patronId');
+      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','patronId');
     }
     else if (typeof req.isbn !== 'string'){
-      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','=isbn');
+      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','isbn');
     }
+    //errors on bad book
     if(!this.books[req.isbn]){
       return Errors.errResult('unknown book ${req.isbn}; widget=', "BAD_REQ", 'isbn')
     }
-    else if(this.patronArray[req.patron] && this.patronArray[req.patron].includes(req.isbn)){
+    this.bookPatron[req.isbn] = this.bookPatron[req.isbn] || [];
+    this.patronArray[req.patronId] = this.patronArray[req.patronId] || [];
+
+    //errors on multiple checkout of same book by same patron
+    if(this.patronArray[req.patronId].includes(req.isbn)){
       return Errors.errResult('patron ${req.patronId} already has book ${req.isbn} checked out; widget=', "BAD_REQ", 'isbn');
     }
-    else if (this.books[req.isbn].nCopies === 0) {
-      // If nCopies is 0, return an error indicating no copies are available
+    
+    else if (this.books[req.isbn].nCopies <= this.bookPatron[req.isbn].length) {
+      // If nCopies, return an error indicating no copies are available
       return Errors.errResult(': no copies of book ${req.isbn} are available for checkout; widget=', "BAD_REQ", 'isbn');
     }
-    this.patronArray[req.patronId] = [req.isbn];
-    this.bookPatron[req.isbn] = [req.patronId];
-    this.books[req.isbn].nCopies--;
+    this.patronArray[req.patronId].push(req.isbn);
+    this.bookPatron[req.isbn].push(req.patronId);
     return Errors.okResult(undefined);  //placeholder
   }
 
@@ -198,39 +203,41 @@ export class LendingLibrary {
    *    BAD_TYPE: patronId or isbn field is not a string.
    *    BAD_REQ error on business rule violation.
    */
-  returnBook(req: Record<string, any>) : Errors.Result<void> {
+  returnBook(req: ReturnBookReq) : Errors.Result<void> {
     //TODO 
     if(req.patronId === undefined){
-      return Errors.errResult(': property patronId is required; widget=', "MISSING",'=patronId');
+      return Errors.errResult(': property patronId is required; widget=', "MISSING",'patronId');
     }
     else if(req.isbn === undefined){
-      return Errors.errResult(': property isbn is required; widget=', "MISSING",'=isbn');
+      return Errors.errResult(': property isbn is required; widget=', "MISSING",'isbn');
     }
     else if (typeof req.patronId !== 'string'){
-      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','=patronId');
+      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','patronId');
     }
     else if (typeof req.isbn !== 'string'){
-      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','=isbn');
+      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','isbn');
     }
+    // errors on bad book
     if(!this.books[req.isbn]){
-      return Errors.errResult('unknown book ${req.isbn}; widget=', "BAD_REQ", '=isbn')
+      return Errors.errResult('unknown book ${req.isbn}; widget=', "BAD_REQ", 'isbn')
     }
-    else if(!this.patronArray[req.patron]){
-      return Errors.errResult('unknown patron ${req.patronId}; widget=', "BAD_REQ", '=patronId');
+    //if patronId is not present
+    if(!this.patronArray[req.patronId]){
+      return Errors.errResult('unknown patron ${req.patronId}; widget=', "BAD_REQ", 'patronId');
     }
-    else if(!this.patronArray[req.patron].includes(req.isbn)){
-      return Errors.errResult('no checkout of book ${req.isbn} by patron ${req.patronId}', "BAD_REQ", 'isbn');
+    //does not allow repeated return of books
+    else if(!this.patronArray[req.patronId].includes(req.isbn)){
+      return Errors.errResult('no checkout of book ${req.isbn} by patron ${req.patronId}', 'BAD_REQ', 'isbn');
     }
     const patronBooksIndex = this.patronArray[req.patronId].indexOf(req.isbn);
     if (patronBooksIndex > -1) {
       this.patronArray[req.patronId].splice(patronBooksIndex, 1);
     }
-    const bookPatronsIndex = this.bookPatron[req.isbn]?.indexOf(req.patronId);
+    const bookPatronsIndex = this.bookPatron[req.isbn].indexOf(req.patronId);
     if (bookPatronsIndex > -1) {
       this.bookPatron[req.isbn].splice(bookPatronsIndex, 1);
     }
-    this.books[req.isbn].nCopies++;
-    return Errors.errResult(undefined);  //placeholder
+    return Errors.okResult(undefined);
   }
 
 
