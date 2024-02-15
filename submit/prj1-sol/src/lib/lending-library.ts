@@ -1,6 +1,7 @@
 import { Errors } from 'cs544-js-utils';
 import { errResult } from 'cs544-js-utils/dist/lib/errors';
 import { argv0 } from 'process';
+import { isBigInt64Array } from 'util/types';
 
 /** Note that errors are documented using the `code` option which must be
  *  returned (the `message` can be any suitable string which describes
@@ -162,13 +163,32 @@ export class LendingLibrary {
    */
   checkoutBook(req: Record<string, any>) : Errors.Result<void> {
     //TODO
-    if(req === undefined){
-      return Errors.errResult(': property patronId is required; widget=', "MISSING",'patronId');
+    if(req.patronId === undefined){
+      return Errors.errResult(': property patronId is required; widget=', "MISSING",'=patronId');
     }
-    else if (typeof req.search !== 'string' ){
-      return Errors.errResult(': property search must be string; widget=','BAD_TYPE','=search');
+    else if(req.isbn === undefined){
+      return Errors.errResult(': property isbn is required; widget=', "MISSING",'=isbn');
     }
-    return Errors.errResult('TODO');  //placeholder
+    else if (typeof req.patronId !== 'string'){
+      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','=patronId');
+    }
+    else if (typeof req.isbn !== 'string'){
+      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','=isbn');
+    }
+    if(!this.books[req.isbn]){
+      return Errors.errResult('unknown book ${req.isbn}; widget=', "BAD_REQ", 'isbn')
+    }
+    else if(this.patronArray[req.patron] && this.patronArray[req.patron].includes(req.isbn)){
+      return Errors.errResult('patron ${req.patronId} already has book ${req.isbn} checked out; widget=', "BAD_REQ", 'isbn');
+    }
+    else if (this.books[req.isbn].nCopies === 0) {
+      // If nCopies is 0, return an error indicating no copies are available
+      return Errors.errResult(': no copies of book ${req.isbn} are available for checkout; widget=', "BAD_REQ", 'isbn');
+    }
+    this.patronArray[req.patronId] = [req.isbn];
+    this.bookPatron[req.isbn] = [req.patronId];
+    this.books[req.isbn].nCopies--;
+    return Errors.okResult(undefined);  //placeholder
   }
 
   /** Set up patron req.patronId to returns book req.isbn.
@@ -180,7 +200,37 @@ export class LendingLibrary {
    */
   returnBook(req: Record<string, any>) : Errors.Result<void> {
     //TODO 
-    return Errors.errResult('TODO');  //placeholder
+    if(req.patronId === undefined){
+      return Errors.errResult(': property patronId is required; widget=', "MISSING",'=patronId');
+    }
+    else if(req.isbn === undefined){
+      return Errors.errResult(': property isbn is required; widget=', "MISSING",'=isbn');
+    }
+    else if (typeof req.patronId !== 'string'){
+      return Errors.errResult(': property patronId must be string; widget=','BAD_TYPE','=patronId');
+    }
+    else if (typeof req.isbn !== 'string'){
+      return Errors.errResult(': property isbn must be string; widget=','BAD_TYPE','=isbn');
+    }
+    if(!this.books[req.isbn]){
+      return Errors.errResult('unknown book ${req.isbn}; widget=', "BAD_REQ", '=isbn')
+    }
+    else if(!this.patronArray[req.patron]){
+      return Errors.errResult('unknown patron ${req.patronId}; widget=', "BAD_REQ", '=patronId');
+    }
+    else if(!this.patronArray[req.patron].includes(req.isbn)){
+      return Errors.errResult('no checkout of book ${req.isbn} by patron ${req.patronId}', "BAD_REQ", 'isbn');
+    }
+    const patronBooksIndex = this.patronArray[req.patronId].indexOf(req.isbn);
+    if (patronBooksIndex > -1) {
+      this.patronArray[req.patronId].splice(patronBooksIndex, 1);
+    }
+    const bookPatronsIndex = this.bookPatron[req.isbn]?.indexOf(req.patronId);
+    if (bookPatronsIndex > -1) {
+      this.bookPatron[req.isbn].splice(bookPatronsIndex, 1);
+    }
+    this.books[req.isbn].nCopies++;
+    return Errors.errResult(undefined);  //placeholder
   }
 
 
