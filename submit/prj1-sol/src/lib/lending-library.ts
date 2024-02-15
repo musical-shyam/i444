@@ -51,7 +51,7 @@ export class LendingLibrary {
   private bookPatron: Record<ISBN, PatronId[]>; // stores Patron that took a particular book
   private patronArray: Record<PatronId, ISBN[]>; // stores the books that a patron has taken
   private find: Record<string, ISBN[]>; // stores an array of bookId where a word has occured
-  
+
   constructor() {
     //TODO: initialize private TS properties for instance
     this.books = {};//all are empty dictionaries intially
@@ -104,6 +104,17 @@ export class LendingLibrary {
         return Errors.errResult(': property ${x} must be greater than 0, widget=','BAD_REQ', x);
       }
     }
+    if(this.books[req['isbn']]){
+      const AddBookReq: Record<string, any> = this.books[req.isbn];
+      for(const x of reqFields){
+        if(req[x] !== AddBookReq[x]){
+          return Errors.errResult(': inconsistent ${x} data for book ${AddBookReq.isbn}; widget=', 'BAD_REQ',x);
+        }
+      }
+      this.books[req['isbn']].nCopies += req.nCopies;
+      return Errors.okResult(this.books[req.isbn]);
+    }
+    this.searchWord(req);
     this.books[req['isbn']] = req as XBook;
     return Errors.okResult(this.books[req.isbn]);//placeholder
   }
@@ -119,7 +130,26 @@ export class LendingLibrary {
    */
   findBooks(req: Record<string, any>) : Errors.Result<XBook[]> {
     //TODO
-    return Errors.errResult('TODO');  //placeholder
+    if(req === undefined){
+      return Errors.errResult(': property search is required; widget=', "MISSING","=search");
+    }
+    else if (typeof req.search !== 'string' ){
+      return Errors.errResult(': property search must be string; widget=','BAD_TYPE','=search');
+    }
+    const words = req.search.toLowerCase().match(/\w{2,}/g);
+    if(!words||words.length === 0||req.search.trim()===''){
+      return Errors.errResult(': property search should not be empty; widget=','BAD_REQ','=search');
+    }
+    let isbns = words.map(word => this.find[word] || []).reduce((acc, cur) => acc.length ?acc.filter(isbn => cur.includes(isbn)) : cur, []);
+
+    // Find books by ISBNs and sort by title
+    const books = isbns.map(isbn => this.books[isbn]).sort((a, b) => a.title.localeCompare(b.title));
+
+    // Return results
+    if (books.length) {
+      return Errors.okResult(books);
+    } 
+    return Errors.okResult([]);  //placeholder
   }
 
 
@@ -132,6 +162,12 @@ export class LendingLibrary {
    */
   checkoutBook(req: Record<string, any>) : Errors.Result<void> {
     //TODO
+    if(req === undefined){
+      return Errors.errResult(': property patronId is required; widget=', "MISSING",'patronId');
+    }
+    else if (typeof req.search !== 'string' ){
+      return Errors.errResult(': property search must be string; widget=','BAD_TYPE','=search');
+    }
     return Errors.errResult('TODO');  //placeholder
   }
 
@@ -146,18 +182,28 @@ export class LendingLibrary {
     //TODO 
     return Errors.errResult('TODO');  //placeholder
   }
-  
-}
 
 
 /********************** Domain Utility Functions ***********************/
 
 
 //TODO: add domain-specific utility functions or classes.
+  searchWord(req: Record<string, any>): void {
+    const addWord = (word: string) => { const lowerWord = word.toLowerCase();
+      if (!this.find[lowerWord]) {
+        this.find[lowerWord] = [req['isbn']];
+      } 
+      else if (!this.find[lowerWord].includes(req['isbn'])) {
+        this.find[lowerWord].push(req['isbn']);
+      }
+    };
+    // using regex and addword function to divide each and every word
+    req.title.match(/\w{2,}/g)?.forEach(addWord);
 
+    // Tokenize and add authors words
+    req.authors.forEach((author: string) => author.match(/\w{2,}/g)?.forEach(addWord));
+  }
 /********************* General Utility Functions ***********************/
-
-//TODO: add general utility functions or classes.
-function Missing(){
-
 }
+//TODO: add general utility functions or classes.
+
