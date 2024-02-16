@@ -1,7 +1,5 @@
 import { Errors } from 'cs544-js-utils';
-import { errResult } from 'cs544-js-utils/dist/lib/errors';
-import { argv0 } from 'process';
-import { isBigInt64Array } from 'util/types';
+
 
 /** Note that errors are documented using the `code` option which must be
  *  returned (the `message` can be any suitable string which describes
@@ -61,43 +59,33 @@ export class LendingLibrary {
     this.find ={};
   }
 
-  /** Add one-or-more copies of book represented by req to this library.
-   *
-   *  Errors:
-   *    MISSING: one-or-more of the required fields is missing.
-   *    BAD_TYPE: one-or-more fields have the incorrect type.
-   *    BAD_REQ: other issues like nCopies not a positive integer 
-   *             or book is already in library but data in obj is 
-   *             inconsistent with the data already present.
-   */
   addBook(req: Record<string, any>): Errors.Result<XBook> {
-    //TODO
-    const reqFields = ['isbn', 'title', 'authors', 'pages', 'year', 'publisher'];//as all keys in dict are string
-    for(const x of reqFields){//using the for loop to check if all the required field are their
+    //as all keys in dict are string
+    const reqFields = ['isbn', 'title', 'authors', 'pages', 'year', 'publisher'];
+    //using the for loop to check if all the required field are present
+    for(const x of reqFields){
       if(req[x] === undefined){
         return Errors.errResult(': property ${x} is required; widget=', 'MISSING',x);
       }
     }
-    if (typeof req.isbn !== 'string'){
-      return Errors.errResult(': property ${x} must be string, widget=','BAD_TYPE', 'isbn');
+    //checking for the required type of the field and if all numbers are greater than 0
+    const String_Fields = ['isbn', 'title', 'publisher'];
+    for (const x of String_Fields){
+      if (typeof req[x] !== 'string'){
+        return Errors.errResult(': property ${x} must be string; widget=','BAD_TYPE', x);
+      }
     }
-    else if (typeof req.title !== 'string'){
-      return Errors.errResult(': property ${x} must be string, widget=','BAD_TYPE', 'title');
-    } 
-    else if (!Array.isArray(req.authors) || req.authors.some(author => typeof author !== 'string')){
+    if (!Array.isArray(req.authors) || req.authors.some(author => typeof author !== 'string')){
       return Errors.errResult(': property ${x} must be type string[]; widget=','BAD_TYPE', 'authors');
     } 
     else if(req.authors.length === 0){
       return Errors.errResult(': property ${x} is empty; widget=','BAD_TYPE', 'authors');
     }
-    else if (typeof req.publisher !== 'string') {
-      return Errors.errResult(': property ${x} must be string; widget=','BAD_TYPE', 'publisher');
-    } 
     if (req["nCopies"] === undefined) {
       req['nCopies'] = 1;
     }
-    const NUMERIC_FIELDS = [ 'pages', 'year', 'nCopies' ];
-    for (const x of NUMERIC_FIELDS){
+    const Numeric_Fields = [ 'pages', 'year', 'nCopies' ];
+    for (const x of Numeric_Fields){
       if (typeof req[x] !== 'number'){
         return Errors.errResult(': property ${x} must be numeric; widget=','BAD_TYPE', x);
       }
@@ -105,6 +93,7 @@ export class LendingLibrary {
         return Errors.errResult(': property ${x} must be greater than 0, widget=','BAD_REQ', x);
       }
     }
+    //checking if book exists, if exists and if same details, no of copies increases
     if(this.books[req['isbn']]){
       const AddBookReq: Record<string, any> = this.books[req.isbn];
       for(const x of reqFields){
@@ -115,22 +104,14 @@ export class LendingLibrary {
       this.books[req['isbn']].nCopies += req.nCopies;
       return Errors.okResult(this.books[req.isbn]);
     }
-    this.searchWord(req);
+    //adding all the word to the collection of the words
+    this.wordCollection(req);
     this.books[req['isbn']] = req as XBook;
-    return Errors.okResult(this.books[req.isbn]);//placeholder
+    return Errors.okResult(this.books[req.isbn]);
   }
 
-  /** Return all books matching (case-insensitive) all "words" in
-   *  req.search, where a "word" is a max sequence of /\w/ of length > 1.
-   *  Returned books should be sorted in ascending order by title.
-   *
-   *  Errors:
-   *    MISSING: search field is missing
-   *    BAD_TYPE: search field is not a string.
-   *    BAD_REQ: no words in search
-   */
   findBooks(req: Record<string, any>) : Errors.Result<XBook[]> {
-    //TODO
+    //check the parameters
     if(req === undefined){
       return Errors.errResult(': property search is required; widget=', "MISSING","=search");
     }
@@ -142,27 +123,16 @@ export class LendingLibrary {
       return Errors.errResult(': property search should not be empty; widget=','BAD_REQ','=search');
     }
     let isbns = words.map(word => this.find[word] || []).reduce((acc, cur) => acc.length ?acc.filter(isbn => cur.includes(isbn)) : cur, []);
-
     // Find books by ISBNs and sort by title
     const books = isbns.map(isbn => this.books[isbn]).sort((a, b) => a.title.localeCompare(b.title));
-
     // Return results
     if (books.length) {
       return Errors.okResult(books);
     } 
-    return Errors.okResult([]);  //placeholder
+    return Errors.okResult([]); 
   }
 
-
-  /** Set up patron req.patronId to check out book req.isbn. 
-   * 
-   *  Errors:
-   *    MISSING: patronId or isbn field is missing
-   *    BAD_TYPE: patronId or isbn field is not a string.
-   *    BAD_REQ error on business rule violation.
-   */
   checkoutBook(req: CheckoutBookReq) : Errors.Result<void> {
-    //TODO
     if(req.patronId === undefined){
       return Errors.errResult(': property patronId is required; widget=', "MISSING",'patronId');
     }
@@ -186,23 +156,15 @@ export class LendingLibrary {
     if(this.patronArray[req.patronId].includes(req.isbn)){
       return Errors.errResult('patron ${req.patronId} already has book ${req.isbn} checked out; widget=', "BAD_REQ", 'isbn');
     }
-    
+    // If nCopies<=the number of patrons that have the book, return an error indicating no copies are available
     else if (this.books[req.isbn].nCopies <= this.bookPatron[req.isbn].length) {
-      // If nCopies, return an error indicating no copies are available
       return Errors.errResult(': no copies of book ${req.isbn} are available for checkout; widget=', "BAD_REQ", 'isbn');
     }
     this.patronArray[req.patronId].push(req.isbn);
     this.bookPatron[req.isbn].push(req.patronId);
-    return Errors.okResult(undefined);  //placeholder
+    return Errors.okResult(undefined);  
   }
-
-  /** Set up patron req.patronId to returns book req.isbn.
-   *  
-   *  Errors:
-   *    MISSING: patronId or isbn field is missing
-   *    BAD_TYPE: patronId or isbn field is not a string.
-   *    BAD_REQ error on business rule violation.
-   */
+  
   returnBook(req: ReturnBookReq) : Errors.Result<void> {
     //TODO 
     if(req.patronId === undefined){
@@ -245,7 +207,7 @@ export class LendingLibrary {
 
 
 //TODO: add domain-specific utility functions or classes.
-  searchWord(req: Record<string, any>): void {
+  wordCollection(req: Record<string, any>): void {
     const addWord = (word: string) => { const lowerWord = word.toLowerCase();
       if (!this.find[lowerWord]) {
         this.find[lowerWord] = [req['isbn']];

@@ -4,7 +4,7 @@
   "description": "Name:\t\tXXX B-Number:\tXXX Email:\t\tXXX",
   "main": "index.js",
   "scripts": {
-    "clean": "shx rm -rf dist",
+    "clean": "shx rm -rf dist node_modules",
     "build": "tsc",
     "postbuild": "shx chmod a+x dist/index.js",
     "watch": "tsc --watch",
