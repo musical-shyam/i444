@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Homework  2</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <script type="text/javascript"
+          src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js">
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+    <link href="../../assets/styles/article.css" rel="stylesheet" type="text/css" /> 
+</head>
+
+<body class=umt-article>
+    <nav id="course-nav">
+      <ul>
+      </ul>
+    </nav>
+
+    <div class="umt-content">
+      <div><section data-level="h1"><h1>Homework  2</h1><p><strong>Due</strong>: 3/12 before midnight;				<strong>Max. Points</strong>: 100 <br>
+<strong>No late submissions</strong>
+</p><p>To be turned in as a <strong>single PDF</strong> via submission link on gradescope.
+Specifically, when you access the submission link on gradescope, you
+will need to upload a single PDF and indicate the page within your
+upload where your answer to each question is located.
+</p><p><strong>Important Reminder</strong>: As per the course
+
+<a href="../../misc/academic-honesty/academic-honesty-policy.html">Academic Honesty Policy</a>, cheating of any kind will minimally
+result in your letter grade for the entire course being reduced by one
+level.
+</p><p><strong>Please justify all answers</strong>.
+</p><p><strong>It may be the case that some questions cannot be answered as
+ requested.</strong>
+</p><ol><li><p>The provided code for
+    
+    <a href="../../projects/prj2/prj2-sol/src/lib/library.ts?lang=ts">library.ts</a> for  <a href="../../projects/prj2/prj2.html">Project 2</a> has an
+    auxiliary <code>MSGS</code> table used to translate zod error messages to
+    messages used by our <code>Result</code> type.  Such a table can also be
+    useful for the
+    
+    <a href="https://en.wikipedia.org/wiki/Internationalization_and_localization">internationalization</a> (i18n) of a website:
+</p><pre class="hljs language-ts">    //in file msgs_en_us.mjs
+    const MSGS = {
+      ...
+      'msg.hello': 'Hello',
+      ...
+    };
+    export default MSGS;
+</pre><pre class="hljs language-ts">    //in file msgs_fr_ca.mjs
+    const MSGS = {
+      ...
+      'msg.hello': 'Bonjour',
+      ...
+    };
+
+    export default MSGS;
+</pre><p>    During early development, a developer may hardcode use of US English
+    messages:
+</p><pre class="hljs language-javascript">    import MSGS from 'msgs_en_us';
+
+    console.log(MSGS['msg.hello']); //hello
+</pre><p>    A large website may support tens of locales with a separate
+    message table for each locale.  Since such a table may have tens
+    of thousands of messages, it would be wasteful to upload tables
+    for all possible locales to a browser.  So once the code in the
+    browser has determined the browser's locale as some <code>localeStr</code>
+    like <code>en_us</code> or <code>fr_ca</code>, it should <code>import</code> only the table for
+    that specific locale.
+</p><p>    Show the code for importing only the module for <code>localeStr</code>.
+    <em>5-points</em>
+</p></li><li><p>A website depends on an external service accessed using a <code>async</code>
+    function <code>getService()</code>.  To facilitate development, a developer
+    uses a local instance of that service running on their laptop.
+    This results in a great  <a href="https://microsoft.github.io/code-with-engineering-playbook/developer-experience/">dev-ex,</a> but at some point the developer
+    would like to experience a more realistic
+     <a href="https://en.wikipedia.org/wiki/User_experience">UX</a> by adding
+    random delays to the locally running service.
+</p><p>    Show code which will wrap <code>getService()</code> within a random
+    parameterizable time delay. <em>15-points</em>
+</p></li><li><p>Critique and fix the following code (where the specs should be
+    obvious from the function names):
+</p><pre class="hljs language-js">    //no problem here
+    async function getImage(imgUrl) { ... }
+
+    async function getAllImages(imgUrls) {
+      return await imgUrls.map(async u => await getImage(u));
+    }
+</pre><p>    Besides correctness, performance is also important. <em>10-points</em>
+</p></li><li><p>A novice programmer is asked to fix a bug in a JavaScript
+    codebase.  While fixing the bug, they notice some anonymous
+    functions defined using the <code>function</code> keyword and other anonymous
+    functions defined using the fat-arrow <code>=></code>.  They prefer the
+    pleasanter syntax of the fat-arrow function, and having just read
+    a recent blog post on <em>Code Consistency</em>, they decide to replace
+    all functions defined using <code>function</code> with functions defined
+    using fat-arrow.  Why did they just break the codebase?
+    <em>5-points</em>
+</p></li><li><p>A legacy library has a large set of asynchronous functions all of
+    which take a callback as their last argument:
+</p><p>    Pseudo TS syntax:
+</p><pre class="hljs language-javascript">    function someLegacyFn(
+      ...someArgs,
+      callBackFn: (succ: any, error: any) => void)
+    {
+      //do some async operation; if operation fails call
+      //callBackFn with a non-null error value; otherwise
+      //call callBackFn with success value as succ.
+      ...
+    }
+</pre><p>    Show code for a function <code>makeAsyncAwait(Fn)</code> which takes a legacy
+    function <code>Fn</code> and returns a function which can be called using
+    modern <code>async</code> / <code>await</code> syntax. <em>15-points</em>
+</p></li><li><p>In JavaScript, a common error is to forget to call an <code>async</code> function
+    using an <code>await</code>, as illustrated in the following REPL log:
+</p><pre class="hljs language-js">    > async function f() { return { fn: () => 22 }; }
+    undefined
+    > (await f()).fn()  //correct call
+    22
+    > f().fn()          //incorrect call
+    Uncaught TypeError: f(...).fn is not a function
+    >    
+</pre><p>    Why is this kind of error less likely in a TypeScript
+    program? <em>5-points</em>
+</p></li><li><p>An <code>async</code> function <code>asyncFn()</code> calls a synchronous function
+    <code>syncFn()</code> with an unnecessary await in front of it.
+</p><pre class="hljs language-js">    function syncFn() { return 22; }
+
+    async function asyncFn() {
+      //some other code which really needs await
+      const v = await syncFn();
+      return v;
+    }
+</pre><p>    How does the unnecessary <code>await</code> affect the operation of the
+    program? <em>10-points</em>
+</p></li><li><p>Write a function <code class="hljs language-javascript">fact(n)</code> which can be used as in
+</p><pre class="hljs language-javascript">    for (f of fact(6)) console.log(f);
+</pre><p>    to print out successive factorials 1, 2, 6, 24, 120, 720.
+    The return value of <code>fact()</code> is not allowed to be a collection
+    type like an array, <code>Set</code> or <code>Map</code> <em>10-points</em>
+</p></li><li><p>Assuming no earlier variable declarations:
+</p><pre class="hljs language-javascript">    x = 1;
+    obj1 = { x: 2, f: function() { return this.x; } }
+    obj2 = { x: 3, f: function() { return this.x; } }
+    f = obj1.f.bind(obj2);
+    console.log(obj1.f() - obj2.f() + f());
+</pre><p>    Explain why the output of the above JavaScript code when run in
+    non-strict mode is 2.  <em>10-points</em>
+</p></li><li><p>Discuss the validity of the following statements. <em>15-points</em>
+</p><ol><li><p><code>this</code> for a fat-arrow function can be changed using <code>bind()</code>.
+</p></li><li><p>In modern JavaScript, having both <code>call()</code> and <code>apply()</code> are
+        redundant; i.e. each one can be implemented in terms of the
+        other.
+</p></li><li><p>It is impossible to wrap an asynchronous function within
+        a synchronous function.
+</p></li><li><p>The return value of a <code>then()</code> is always a promise.
+</p></li><li><p>The promise returned by <code>Promise.all()</code> will become settled
+        after a minimum time which is the sum of the times required
+        for settlement of each of its individual argument promises.
+</p></li></ol></li></ol></section></div>
+    </div>
+
+    <script type="module" src="../../assets/scripts/slide-controls.mjs"></script>
+    <script type="module" src="../../assets/scripts/nav.mjs"></script> 
+    <script type="module" src="../../assets/scripts/highlight.mjs"></script>
+</body>
+</html>
+

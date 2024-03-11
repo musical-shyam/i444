@@ -44,7 +44,7 @@ const TODO = -1; //used for placeholder return value in initial assignment.
  *  Returns strings with each element reversed.
  */
 function revStrings(strings: string[]) : string[] {
-  return [ 'TODO' ];
+  return strings.map(str => str.split('').reverse().join(''));
 }
 
 if (false) {
@@ -63,7 +63,7 @@ if (false) {
  *  consecutive \w characters.
  */
 function getCapitalizedWords(str: string) : string[] {
-  return [ 'TODO' ];
+  return str.match(/\b[A-Z]\w{1,}\b/g) || [];
 }
 
 if (false) {
@@ -81,7 +81,7 @@ if (false) {
  *  immediately follows a lower-case letter a-z.
  */
 function getCamelCasedWords(str: string) : string[] {
-  return [ 'TODO' ];
+  return str.match(/\b[a-z]+\w*[A-Z]\w*\b/g) || [];
 }
 
 if (false) {
@@ -98,7 +98,7 @@ if (false) {
  *  [1, 2, ..., (n-1), n, (n-1), ..., 2, ].
  */
 function upDown1n1(n: number) : number[] {
-  return [ TODO ];
+  return Array.from({ length: 2 * n - 1 }, ( _, i) => i < n ? i + 1: (2 * n - i - 1));
 }
 
 if (false) {
@@ -114,7 +114,10 @@ if (false) {
  *  perms is a permutation of it.
  */
 function isPermutation(list: number[], perms: number[]) : boolean {
-  return !!'TODO';
+  if (list.length !== perms.length) return false; //
+  const sortedList = list.sort((a, b) => a - b);
+  const sortedPerms = perms.sort((a, b) => a - b);
+  return sortedList.every((value, index) => value === sortedPerms[index]);;
 }
 
 if (false) {
@@ -133,8 +136,8 @@ if (false) {
  *  Given a number x and an integer n >= 0, return x**n
  *  without using **.
  */
-function pow(x: number, n: number) : number {
-  return TODO;
+function pow(x: number, n: number) : number { 
+  return Array.from({ length: n }).map(()=> x).reduce(acc => acc * x, 1);
 }
 
 if (false) {
@@ -153,7 +156,7 @@ if (false) {
  */
 // Hint: the JS ** operator is right associative
 function tetrate(x: number, h: number) : number {
-  return TODO;
+  return Array.from({ length: h -1 }).map(()=> x).reduce(acc =>pow(x,acc), x);
 }
 
 
@@ -178,7 +181,7 @@ if (false) {
  *  base b.
  */
 function digitsNumberValueInBase(b: number, bDigits: number[]) : number {
-  return TODO;
+  return bDigits.reduce((acc, curr, i) => acc + curr * pow(b, i), 0);
 }
 
 if (false) {
@@ -202,9 +205,15 @@ if (false) {
  */
 // *Hint*: use charCodeAt() <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt> 
 function bStringValue(bString: string, b: number) : number {
-  return TODO;
+  const bDigits = bString.split('').reverse().map(char => {
+    if (char >= '0' && char <= '9') {
+      return char.charCodeAt(0) - '0'.charCodeAt(0);
+    } else {
+      return char.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+    }
+  });
+  return digitsNumberValueInBase(b, bDigits)
 }
-
 if (false) {
   logTests('bStringValue', [
     () => bStringValue("123", 10),
@@ -220,7 +229,7 @@ if (false) {
  *  list of the consecutive pairs of ls.
  */
 function listPairs<T>(ls: T[]) : T[][] {
-  return [ ]; //TODO
+  return Array.from({ length: ls.length / 2 }, (_, i) => [ls[2 * i], ls[2 * i + 1]]);
 }
 
 if (false) {
@@ -240,7 +249,7 @@ if (false) {
  */
 // *Hint*: this is merely a generalization of the previous exercise
 function nTuples<T>(ls: T[], n: number) : T[][] {
-  return []; //TODO
+  return  Array.from({ length: ls.length/n }, (_, i) => Array.from({ length: n }, (_, k) => ls[i * n + k]))
 }
 
 if (false) {
@@ -262,7 +271,10 @@ if (false) {
  *  See <https://en.wikipedia.org/wiki/E_(mathematical_constant)>
  */
 function e(n: number) : number {
-  return TODO;
+  return Array.from({ length: n }, (_, i) => i + 1).reduce((acc, k) =>{
+  const factorial = Array.from({ length: k }, (_, i) => i + 1).reduce((product, value) => product * value, 1);
+  return acc + 1 / factorial;
+  },1);
 }
 
 if (false) {
