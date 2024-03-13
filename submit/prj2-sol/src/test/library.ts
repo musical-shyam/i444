@@ -17,12 +17,12 @@ describe.skip('library types', () => {
     
     it('missing fields makes a good book invalid', () => {
       for (const field of Object.keys(BOOK_1)) {
-	if (field === 'nCopies') continue;
-	const req: Record<string, any> = { ...BOOK_1 };
-	delete req[field];
-	const result = Lib.validate('addBook', req);
-	assert(result.isOk === false);
-	expect(result.errors.length).to.be.gt(0);
+          if (field === 'nCopies') continue;
+          const req: Record<string, any> = { ...BOOK_1 };
+          delete req[field];
+          const result = Lib.validate('addBook', req);
+          assert(result.isOk === false);
+          expect(result.errors.length).to.be.gt(0);
       }
     });
 
@@ -35,7 +35,11 @@ describe.skip('library types', () => {
     });
 
     it('having no authors is invalid', () => {
-      assert.fail('TODO');
+      const req: Record<string,any> = { ...BOOK_1};
+      req.authors = [];
+      const result = Lib.validate('addBook', req);
+      assert(result.isOk === false);
+      expect(result.errors.length).to.be.gt(0);
     });
     
     it('an empty author is invalid', () => {
@@ -47,7 +51,10 @@ describe.skip('library types', () => {
     });
     
     it('badly typed fields makes a good book invalid', () => {
-      assert.fail('TODO');
+      //assert.fail('TODO');
+      const result = Lib.validate('addBook', BOOK_1);
+      assert(result.isOk === false);
+      expect(result.errors.length).to.be.gt(0);
     });
 
     it('empty string fields makes a good book invalid', () => {

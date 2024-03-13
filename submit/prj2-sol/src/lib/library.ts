@@ -27,7 +27,7 @@ const MSGS = {
 const Book = z.object({
   isbn: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{1}$/),
   title: z.string().min(1),
-  authors: z.array(z.string().min(1)).nonempty(),
+  authors: z.array(z.string().min(1)),
   pages: z.number().positive().int(),
   year: z.number().int().gte(GUTENBERG_YEAR).lte(NOW_YEAR),
   publisher: z.string().min(1),
