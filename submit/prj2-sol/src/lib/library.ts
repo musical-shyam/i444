@@ -45,7 +45,7 @@ export type XBook = z.infer<typeof XBook>;
 const Find = z.object({
   search: z.string(),
   index: z.number(),
-  count: z.number(),
+  count: z.number()
 });
 export type Find = z.infer<typeof Find>;
 
@@ -73,4 +73,3 @@ export function validate<T>(command: string, req: Record<string, any>)
     ? zodToResult(validator.safeParse(req), MSGS)
     : Errors.errResult(`no validator for command ${command}`);
 }
-
