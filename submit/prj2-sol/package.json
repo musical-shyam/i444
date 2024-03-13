@@ -30,7 +30,7 @@
     "dependencies": {
         "cs544-js-utils": "https://sunybing:sunybing@zdu.binghamton.edu/cs544/lib/cs544-js-utils-0.0.1.tgz",
         "cs544-node-utils": "https://sunybing:sunybing@zdu.binghamton.edu/cs544/lib/cs544-node-utils-0.0.1.tgz",
-        "mongodb": "6.4.0",
-        "zod": "3.22.4"
+        "mongodb": "^6.4.0",
+        "zod": "^3.22.4"
     }
 }
