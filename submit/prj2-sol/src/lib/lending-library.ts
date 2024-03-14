@@ -51,7 +51,7 @@ export class LendingLibrary {
    */
   async addBook(req: Record<string, any>): Promise<Errors.Result<Lib.XBook>> {
     try {
-      // Validate the incoming request
+      // Validate the book
       const Result = Lib.validate<Lib.XBook>('addBook', req);
       if (!Result.isOk) {
         return Result; // Return validation error if validation fails
@@ -69,7 +69,8 @@ export class LendingLibrary {
       // Proceed with adding the book to the library using the DAO
       const addResult = await this.dao.addBook(Result.val);
       return addResult;
-    } catch (error) {
+    } 
+    catch (error) {
       return Errors.errResult(error.message, 'DB'); // Return database error if any
     }
   }
@@ -93,31 +94,22 @@ export class LendingLibrary {
    *    BAD_TYPE: search field is not a string or index/count are not numbers.
    *    BAD_REQ: no words in search, index/count not int or negative.
    */
-  async findBooks(req: Record<string, any>)
-    : Promise<Errors.Result<Lib.XBook[]>>
+  async findBooks(req: Record<string, any>): Promise<Errors.Result<Lib.XBook[]>>
   {
     try {
-      // Validate the request
-      const validatedRequest = Lib.validate<Lib.Find>("findBooks", req);
-      
-      // If validation fails, return the validation error
-      if (!validatedRequest.isOk) {
-          return validatedRequest as Errors.Result<Lib.XBook[]>;
+      // Validating the book
+      const Result = Lib.validate<Lib.Find>("findBooks", req);
+      if (!Result.isOk) {
+          return Result as Errors.Result<Lib.XBook[]>;
       }
-      
-      // Call DAO method to find books based on the validated request
-      const result = await this.dao.findBooks({
-          search: validatedRequest.val.search,
-          index: validatedRequest.val.index || 0,
-          count: validatedRequest.val.count || DEFAULT_COUNT,
-      });
-      
-      // Return the result
+      // Call find method from DAO
+      const result = await this.dao.findBook({search: Result.val.search, index: Result.val.index || 0, 
+        count: Result.val.count || DEFAULT_COUNT,});
       return result;
-  } catch (error) {
-      // If an error occurs during processing, return an internal error result
-      return Errors.errResult(error.message, "INTERNAL_ERROR");
-  }
+    } 
+    catch (error) {
+        return Errors.errResult(error.message, "INTERNAL_ERROR");
+    }
   }
  
 
@@ -133,48 +125,35 @@ export class LendingLibrary {
    */
   async checkoutBook(req: Record<string, any>) : Promise<Errors.Result<void>> {
     try {
-      // Validate the book information
-      const bookResult = Lib.validate<Lib.Book>('checkoutBook', req);
-      
-      // If book validation fails, return the validation error
-      if (!bookResult.isOk) {
-          return Errors.errResult(bookResult);
+      const Result = Lib.validate<Lib.Book>('checkoutBook', req);
+      if (!Result.isOk) {
+          return Errors.errResult(Result);
       }
-
-      // Retrieve the book from the database
-      const book = bookResult.val;
-      const bookWithSameISBN = await this.dao.findIsbn(book.isbn);
-      
-      // If the book with the specified ISBN is not found, return a bad request error
-      if (!bookWithSameISBN) {
+      // Checking if the book exists
+      const bookExists = await this.dao.findIsbn(Result.val.isbn);
+      if (!bookExists) {
           return Errors.errResult("ISBN does not specify a book in the library", "BAD_REQ");
       }
 
-      // Check the availability of copies for checkout
-      const availableCopies = await this.dao.getAvailableCopies(book.isbn);
-      
-      // If no copies are available, return a bad request error
+      // Checking the availability of copies, ready for checkout
+      const availableCopies = await this.dao.avlCopies(Result.val.isbn);
       if (availableCopies < 1) {
           return Errors.errResult("No copies of the book are available for checkout", "BAD_REQ");
       }
 
-      // Check if the patron has already checked out the same book
-      const hasCheckedOut = await this.dao.hasPatronCheckedOut(book.isbn, req.patronId);
-      
-      // If the patron already has a copy checked out, return a bad request error
-      if (hasCheckedOut) {
+      // Checking if the patron has already checked out the same book
+      const isCheckedOut = await this.dao.isPatronCheckedOut(Result.val.isbn, req.patronId);
+      if (isCheckedOut) {
           return Errors.errResult("Patron already has a copy of the same book checked out", "BAD_REQ");
       }
 
-      // Perform the checkout operation
+      // checking out 
       await this.dao.checkoutBook(req);
-
-      // Return void result indicating successful checkout
       return Errors.VOID_RESULT;
-  } catch (error) {
-      // If an error occurs during processing, return a database error result
-      return Errors.errResult(error.message, "DB");
-  }
+    } 
+    catch (error) {
+        return Errors.errResult(error.message, "DB");
+    }
   }
 
   /** Set up patron req.patronId to returns book req.isbn.
@@ -188,42 +167,25 @@ export class LendingLibrary {
    */
   async returnBook(req: Record<string, any>) : Promise<Errors.Result<void>> {
     try {
-      // Validate the request
-      const validationResult = Lib.validate<Lib.Lend>('returnBook', req);
-
-      // If the request is not valid, return the validation error
-      if (!validationResult.isOk) {
-          return Errors.errResult(validationResult);
+      const Result = Lib.validate<Lib.Lend>('returnBook', req);
+      if (!Result.isOk) {
+          return Errors.errResult(Result);
       }
-
-      // Extract lend information from the validated request
-      const lendInfo = validationResult.val;
-
-      // Check if the book with the provided ISBN exists in the library
-      const bookExists = await this.dao.findIsbn(lendInfo.isbn);
-
-      // If the book does not exist, return a bad request error
+      const bookExists = await this.dao.findIsbn(Result.val.isbn);
       if (!bookExists) {
           return Errors.errResult("The provided ISBN does not match any book in the library", "BAD_REQUEST");
       }
-
-      // Check if the patron has checked out the book
-      const hasCheckedOut = await this.dao.hasPatronCheckedOut(lendInfo.isbn, lendInfo.patronId);
-
-      // If the patron has not checked out the book, return a bad request error
-      if (!hasCheckedOut) {
+      const isCheckedOut = await this.dao.isPatronCheckedOut(Result.val.isbn, Result.val.patronId);
+      if (!isCheckedOut) {
           return Errors.errResult("The specified patron has not checked out this book", "BAD_REQUEST");
       }
 
-      // Perform the return operation
-      await this.dao.returnBook(lendInfo);
-
-      // Return a void result to indicate successful return
+      // Returning the book
+      await this.dao.returnBook(Result.val);
       return Errors.VOID_RESULT;
     } 
     catch (error) {
-      // If an error occurs during processing, return a database error result
-      return Errors.errResult("An internal error occurred while processing the request", "DB");
+      return Errors.errResult(error.message, "DB");
     }
   }
 

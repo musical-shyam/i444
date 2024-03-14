@@ -35,7 +35,7 @@ export class LibraryDao {
       const db = client.db();
       const library = db.collection<Lib.XBook>('Books');
       const patronsCollection = db.collection<Lib.Lend>('Patrons');
-      await library.createIndex({ title: 'text', authors: 'text',} );//{ unique: true }
+      await library.createIndex({ title: 'text', authors: 'text'} );//{ unique: true }
       return Errors.okResult(new LibraryDao(client, library, patronsCollection));  
     }
     catch (error) {
@@ -62,7 +62,7 @@ export class LibraryDao {
   
   //add methods as per your API
 
-  //clears out all your collection
+  //clearing out all the book collection
   async clear() : Promise<Errors.Result<void>> {
     try {
       await this.library.deleteMany({});
@@ -97,7 +97,7 @@ export class LibraryDao {
       return Errors.errResult((err as Error).message, 'DB');
     }
   }
-  // updating the copy number when adding the bo
+  // updating the copy number when adding existing book
   async updateCopies(isbn: string, extraCopies: number): Promise<Errors.Result<void>> {
     try {
         const Result = await this.library.updateOne(
@@ -115,119 +115,73 @@ export class LibraryDao {
     }
 }
 
-
-  async findBooks(filterOptions: {search: string; index: number; count: number;}): Promise<Errors.Result<Lib.Book[]>> 
+  // finding the books which has the string in its author and title
+  async findBook(Find: {search: string; index: number; count: number;}): Promise<Errors.Result<Lib.Book[]>> 
   {
     try {
-      // Extract filter parameters
-      const { search, index, count } = filterOptions;
-
-      // Split search query into keywords
-      const searchWords = search.toLowerCase().split(/\W+/).filter(Boolean);
-
-      // Create aggregation pipeline for search
-      const searchPipeline = searchWords.map((word) => ({
-        $match: {
-          $or: [
-            { title: { $regex: word, $options: "i" } },
-            { authors: { $regex: word, $options: "i" } },
-          ],
-        },
-      }));
-
-      // Define sorting pipeline
-      const sortingPipeline = [
-        ...searchPipeline,
-        { $sort: { title: 1 } },
-        { $skip: index },
-        { $limit: count },
-        { $unset: "_id" }, 
-      ];
-
-      // Execute aggregation query
-      const searchResults = await this.library
-        .aggregate<Lib.Book>(sortingPipeline)
-        .toArray();
-
-      // Return results
-      return Errors.okResult(searchResults);
-    } catch (error) {
-      // Handle errors
-      return Errors.errResult(error.message, "DB");
+      const searchWords = '"'+ Find.search.toLowerCase().split(/\W+/).join('" "')+'"' ; 
+      const searchBooks = await this.library.find({ $text: { $search: searchWords } }, { projection: {  _id: 0 } });
+      const books = await searchBooks.sort({ title: 1 }).skip(Find.index).limit(Find.count).toArray();
+      return Errors.okResult(books);
+    } 
+    catch (err) {
+      return Errors.errResult(err.message, 'DB');
     }
   }
   
-
-
-  
+  // to checkoutBooks from the database
   async checkoutBook(checkOutReq: Lib.Lend): Promise<Errors.Result<void>> {
     try {
-      // Destructure ISBN and patron ID from the checkout request object
       const { isbn, patronId } = checkOutReq;
-
-      // Insert the checkout information into the database
       const checkoutResult = await this.Patrons.insertOne({ isbn, patronId });
-
-      // If the checkout operation is acknowledged, return void result
-      if (checkoutResult.acknowledged) {
+      if (checkoutResult.acknowledged) {// returns without error
         return Errors.VOID_RESULT;
       }
-
-      // Return an error result if the checkout operation fails
       return Errors.errResult("Failed to checkout book", "DB");
     } catch (error) {
-      // Return an error result in case of any exceptions
       return Errors.errResult(error.message, "DB");
     }
   }
-
-
-  async getAvailableCopies(isbn: string): Promise<number> {
+  // finding the copies available for checkout
+  async avlCopies(isbn: string): Promise<number> {
     try {
         const checkedOutPatrons = await this.Patrons.find({ isbn: isbn }).toArray();
         const book = await this.library.findOne({ isbn: isbn },)
         if (!book) {
           return -1;
         }
-        
         const totalCopies = book.nCopies;
         return totalCopies - checkedOutPatrons.length;
     } catch (error) {
-        // Handle errors gracefully
         console.error("Error in getAvailableCopies:", error);
         return -1; // Indicate error with a negative value
     }
 }
 
-async hasPatronCheckedOut(bookId: string, patronId: string): Promise<boolean> {
-  try {
-      const patron = await this.Patrons.findOne({ isbn: bookId, patronId: patronId });
-      return !!patron; // Convert to boolean
-  } catch (error) {
-      // Handle errors gracefully
-      console.error("Error in hasPatronCheckedOut:", error);
-      return false; // Default to false in case of error
+  async isPatronCheckedOut(bookId: string, patronId: string): Promise<boolean> {
+    try {
+        const patron = await this.Patrons.findOne({ isbn: bookId, patronId: patronId });
+        return !!patron; // Convert to boolean
+    } catch (error) {
+        console.error("Error in hasPatronCheckedOut:", error);
+        return false; // Default to false in case of error
+    }
   }
-}
-
+  //returns the checked out book
   async returnBook(returnReq: Lib.Lend): Promise<Errors.Result<void>> {
     try {
-      // Destructure ISBN and patron ID from the return request object
       const { isbn, patronId } = returnReq;
 
-      // Delete the return information from the database
+      // Deleting the checkout information
       const returnResult = await this.Patrons.deleteOne({ isbn, patronId });
-
       // If the return operation is acknowledged, return void result
       if (returnResult.acknowledged) {
         return Errors.VOID_RESULT;
       }
 
-      // Return an error result if the return operation fails
       return Errors.errResult("Failed to return book", "DB");
 
     } catch (error) {
-      // Return an error result in case of any exceptions
       return Errors.errResult(error.message, "DB");
     }
   }
