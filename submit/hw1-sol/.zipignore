@@ -1,0 +1,8 @@
+*.d.ts
+*.d.ts.map
+*.gitignore
+*.js
+*.js.map
+*LOG
+*~
+*.zipignore

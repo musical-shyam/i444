@@ -1,0 +1,212 @@
+		      H o m e w o r k   2    
+
+*Due*: 3/12 before midnight;				*Max. Points*: 100 .;
+*No late submissions*
+
+To be turned in as a *single PDF* via submission link on gradescope.
+Specifically, when you access the submission link on gradescope, you
+will need to upload a single PDF and indicate the page within your
+upload where your answer to each question is located.
+
+*Important Reminder*: As per the course
+.<../../misc/academic-honesty/academic-honesty-policy.html>
+"Academic Honesty Policy", cheating of any kind will minimally
+result in your letter grade for the entire course being reduced by one
+level.
+
+*Please justify all answers*.
+
+*It may be the case that some questions cannot be answered as
+ requested.*
+
+
+  # The provided code for
+    .<../../projects/prj2/prj2-sol/src/lib/library.ts?lang=ts>
+    library.ts for .<../../projects/prj2/prj2.html> "Project 2" has an
+    auxiliary `MSGS` table used to translate zod error messages to
+    messages used by our `Result` type.  Such a table can also be
+    useful for the
+    .<https://en.wikipedia.org/wiki/Internationalization_and_localization>
+    internationalization (i18n) of a website:
+
+    .code(lang=ts)
+    ~~~
+    //in file msgs_en_us.mjs
+    const MSGS = {
+      ...
+      'msg.hello': 'Hello',
+      ...
+    };
+    export default MSGS;
+    ~~~
+
+
+    .code(lang=ts)
+    ~~~
+    //in file msgs_fr_ca.mjs
+    const MSGS = {
+      ...
+      'msg.hello': 'Bonjour',
+      ...
+    };
+
+    export default MSGS;
+    ~~~
+
+    During early development, a developer may hardcode use of US English
+    messages:
+
+    ~~~
+    import MSGS from 'msgs_en_us';
+
+    console.log(MSGS['msg.hello']); //hello
+    ~~~
+
+    
+    A large website may support tens of locales with a separate
+    message table for each locale.  Since such a table may have tens
+    of thousands of messages, it would be wasteful to upload tables
+    for all possible locales to a browser.  So once the code in the
+    browser has determined the browser's locale as some `localeStr`
+    like `en_us` or `fr_ca`, it should `import` only the table for
+    that specific locale.
+
+    Show the code for importing only the module for `localeStr`.
+    "5-points"
+
+
+  # A website depends on an external service accessed using a `async`
+    function `getService()`.  To facilitate development, a developer
+    uses a local instance of that service running on their laptop.
+    This results in a great .<https://microsoft.github.io/code-with-engineering-playbook/developer-experience/> dev-ex, but at some point the developer
+    would like to experience a more realistic
+    .<https://en.wikipedia.org/wiki/User_experience> UX by adding
+    random delays to the locally running service.
+
+    Show code which will wrap `getService()` within a random
+    parameterizable time delay. "15-points"
+
+
+  # Critique and fix the following code (where the specs should be
+    obvious from the function names):
+
+    .code(lang=js)
+    ~~~
+    //no problem here
+    async function getImage(imgUrl) { ... }
+
+    async function getAllImages(imgUrls) {
+      return await imgUrls.map(async u => await getImage(u));
+    }
+    ~~~
+
+    Besides correctness, performance is also important. "10-points"
+
+
+  # A novice programmer is asked to fix a bug in a JavaScript
+    codebase.  While fixing the bug, they notice some anonymous
+    functions defined using the `function` keyword and other anonymous
+    functions defined using the fat-arrow `=>`.  They prefer the
+    pleasanter syntax of the fat-arrow function, and having just read
+    a recent blog post on "Code Consistency", they decide to replace
+    all functions defined using `function` with functions defined
+    using fat-arrow.  Why did they just break the codebase?
+    "5-points"
+
+  # A legacy library has a large set of asynchronous functions all of
+    which take a callback as their last argument:
+
+    Pseudo TS syntax:
+
+    ~~~
+    function someLegacyFn(
+      ...someArgs,
+      callBackFn: (succ: any, error: any) => void)
+    {
+      //do some async operation; if operation fails call
+      //callBackFn with a non-null error value; otherwise
+      //call callBackFn with success value as succ.
+      ...
+    }
+    ~~~
+
+    Show code for a function `makeAsyncAwait(Fn)` which takes a legacy
+    function `Fn` and returns a function which can be called using
+    modern `async` / `await` syntax. "15-points"
+
+
+  # In JavaScript, a common error is to forget to call an `async` function
+    using an `await`, as illustrated in the following REPL log:
+
+    .code(lang=js)
+    ~~~
+    > async function f() { return { fn: () => 22 }; }
+    undefined
+    > (await f()).fn()  //correct call
+    22
+    > f().fn()          //incorrect call
+    Uncaught TypeError: f(...).fn is not a function
+    >    
+    ~~~
+
+    Why is this kind of error less likely in a TypeScript
+    program? "5-points"
+
+  # An `async` function `asyncFn()` calls a synchronous function
+    `syncFn()` with an unnecessary await in front of it.
+
+    .code(lang=js)
+    ~~~
+    function syncFn() { return 22; }
+
+    async function asyncFn() {
+      //some other code which really needs await
+      const v = await syncFn();
+      return v;
+    }
+    ~~~
+
+    How does the unnecessary `await` affect the operation of the
+    program? "10-points"
+
+  # Write a function .~fact(n)~ which can be used as in
+
+    ~~~
+    for (f of fact(6)) console.log(f);
+    ~~~
+
+    to print out successive factorials 1, 2, 6, 24, 120, 720.
+    The return value of `fact()` is not allowed to be a collection
+    type like an array, `Set` or `Map` "10-points"
+
+
+  # Assuming no earlier variable declarations:
+
+    ~~~
+    x = 1;
+    obj1 = { x: 2, f: function() { return this.x; } }
+    obj2 = { x: 3, f: function() { return this.x; } }
+    f = obj1.f.bind(obj2);
+    console.log(obj1.f() - obj2.f() + f());
+    ~~~
+
+    Explain why the output of the above JavaScript code when run in
+    non-strict mode is 2.  "10-points"
+
+  # Discuss the validity of the following statements. "15-points"
+
+      # `this` for a fat-arrow function can be changed using `bind()`.
+
+      # In modern JavaScript, having both `call()` and `apply()` are
+        redundant; i.e. each one can be implemented in terms of the
+        other.
+
+      # It is impossible to wrap an asynchronous function within
+        a synchronous function.
+
+      # The return value of a `then()` is always a promise.
+
+      # The promise returned by `Promise.all()` will become settled
+        after a minimum time which is the sum of the times required
+        for settlement of each of its individual argument promises.
+
