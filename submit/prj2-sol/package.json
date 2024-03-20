@@ -1,7 +1,7 @@
 {
     "name": "prj2-sol",
     "version": "1.0.0",
-    "description": "Name:\t\tXXX B-Number:\tXXX Email:\t\tXXX",
+    "description": "Name:\t\tShyam Kannan B-Number:\tB01037711 Email:\t\tskannan@binghamton.edu",
     "main": "index.js",
     "scripts": {
         "clean": "shx rm -rf dist node_modules",

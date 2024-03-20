@@ -47,7 +47,7 @@ function revStrings(strings: string[]) : string[] {
   return strings.map(str => str.split('').reverse().join(''));
 }
 
-if (false) {
+if (true) {
   logTests('revStrings', [
     () => revStrings(['hello', 'world']),
     () => revStrings([ 'madam', 'racecar']),
@@ -66,7 +66,7 @@ function getCapitalizedWords(str: string) : string[] {
   return str.match(/\b[A-Z]\w{1,}\b/g) || [];
 }
 
-if (false) {
+if (true) {
   logTests('getCapitalizedWords', [
     () => getCapitalizedWords(' Hello, world'),
     () => getCapitalizedWords(' A Big--Boy'),
@@ -84,7 +84,7 @@ function getCamelCasedWords(str: string) : string[] {
   return str.match(/\b[a-z]+\w*[A-Z]\w*\b/g) || [];
 }
 
-if (false) {
+if (true) {
   logTests('getCamelCasedWords', [
     () => getCamelCasedWords(' Helloworld'),
     () => getCamelCasedWords(' A BigBoy Barracuda--camelCased'),
@@ -101,7 +101,7 @@ function upDown1n1(n: number) : number[] {
   return Array.from({ length: 2 * n - 1 }, ( _, i) => i < n ? i + 1: (2 * n - i - 1));
 }
 
-if (false) {
+if (true) {
   logTests('upDown1n1', [
     () => upDown1n1(3),
     () => upDown1n1(5),
@@ -120,7 +120,7 @@ function isPermutation(list: number[], perms: number[]) : boolean {
   return sortedList.every((value, index) => value === sortedPerms[index]);;
 }
 
-if (false) {
+if (true) {
   logTests('isPermutation', [
     () => isPermutation([1, 3, 2], [1, 2, 3]),
     () => isPermutation([2, 3, 4], [2, 3, 4]),
@@ -140,7 +140,7 @@ function pow(x: number, n: number) : number {
   return Array.from({ length: n }).map(()=> x).reduce(acc => acc * x, 1);
 }
 
-if (false) {
+if (true) {
   logTests('pow', [
     () => pow(2, 5),
     () => pow(-2, 3),
@@ -160,7 +160,7 @@ function tetrate(x: number, h: number) : number {
 }
 
 
-if (false) {
+if (true) {
   logTests('tetrate', [
     () => tetrate(2, 4),
     () => tetrate(2, 5),
@@ -184,7 +184,7 @@ function digitsNumberValueInBase(b: number, bDigits: number[]) : number {
   return bDigits.reduce((acc, curr, i) => acc + curr * pow(b, i), 0);
 }
 
-if (false) {
+if (true) {
   logTests('digitsNumberValueInBase', [
     () => digitsNumberValueInBase(10, [3, 2, 1]),
     () => digitsNumberValueInBase(10, [6, 5, 4, 3, 2, 1]),
@@ -214,7 +214,7 @@ function bStringValue(bString: string, b: number) : number {
   });
   return digitsNumberValueInBase(b, bDigits)
 }
-if (false) {
+if (true) {
   logTests('bStringValue', [
     () => bStringValue("123", 10),
     () => bStringValue("10101010", 2),
@@ -232,7 +232,7 @@ function listPairs<T>(ls: T[]) : T[][] {
   return Array.from({ length: ls.length / 2 }, (_, i) => [ls[2 * i], ls[2 * i + 1]]);
 }
 
-if (false) {
+if (true) {
   logTests('listPairs', [
     () => listPairs([1, 2]),
     () => listPairs([1, 2, 3, 4]),
@@ -252,7 +252,7 @@ function nTuples<T>(ls: T[], n: number) : T[][] {
   return  Array.from({ length: ls.length/n }, (_, i) => Array.from({ length: n }, (_, k) => ls[i * n + k]))
 }
 
-if (false) {
+if (true) {
   logTests('nTuples', [
     () => nTuples([1, 2], 1),
     () => nTuples([1, 2], 2),
@@ -277,7 +277,7 @@ function e(n: number) : number {
   },1);
 }
 
-if (false) {
+if (true) {
   logTests('e', [
     () => e(6),
   ]);
