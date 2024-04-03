@@ -50,16 +50,17 @@ function setupRoutes(app: Express.Application) {
   app.use(Express.json());
 
   //if uncommented, all requests are traced on the console
-  app.use(doTrace(app));
+  //app.use(doTrace(app));
   
   //set up application routes
   //TODO: set up application routes
   
-  app.get(`${base}/:userId`, doGetBook(app));
-  app.post(`${base}`, doAddBook(app));
-  app.get(`${base}`, doFindBook(app));
-  // app.delete(`${base}/:userId`, doDeleteUser(app));
-  // app.patch(`${base}/:userId`, doUpdateUser(app));
+  
+  app.put(`${base}/:books`, doAddBook(app));
+  app.get(`${base}/books/:isbn`, doGetBook(app));
+  app.get(`${base}/books`, doFindBook(app));
+  app.put(`${base}/lendings`,doCheckoutBook(app));
+  app.delete(`${base}/lendings`,doReturnBook(app));
   app.delete(`${base}`, doClear(app));
   //must be last
   app.use(do404(app));  //custom handler for page not found
@@ -70,10 +71,10 @@ function setupRoutes(app: Express.Application) {
 function doGetBook(app: Express.Application) {
   return (async function(req: Express.Request, res: Express.Response) {
     try {
-      const { isbn } = req.params;
-      const result = await app.locals.model.getBook({isbn});
+      const  isbn  = req.params.isbn;
+      const result = await app.locals.model.getBook(isbn);
       if (!result.isOk) throw result;
-      const response = selfResult<Book>(req, result.val);
+      const response = selfResult(req, result.val);
       res.json(response);
     }
     catch(err) {
@@ -91,7 +92,7 @@ function doAddBook(app: Express.Application) {
       const book = result.val;
       const { isbn } = book;
       res.location(selfHref(req, isbn));
-      const response = selfResult<Book>(req, book, STATUS.CREATED);
+      const response = selfResult(req, book, STATUS.CREATED);
       res.status(STATUS.CREATED).json(response);
     }
     catch(err) {
@@ -104,7 +105,8 @@ function doAddBook(app: Express.Application) {
 function doFindBook(app: Express.Application) {
   return (async function(req: RequestWithQuery, res: Express.Response) {
     try {
-      const q = { ...req.query };      
+      const q = { ...req.query };   
+         
       const index = Number(q.index ??  DEFAULT_INDEX);
       const count = Number(q.count ??  DEFAULT_COUNT);
 
@@ -114,7 +116,7 @@ function doFindBook(app: Express.Application) {
       
       const result = await app.locals.model.findBooks(q1);
       if (!result.isOk) throw result;
-      const response = selfResult<Book>(req, result.val);
+      const response = pagedResult<Book>(req, 'isbn' ,result.val);
       res.json(response);
     }
     catch(err) {
@@ -124,38 +126,36 @@ function doFindBook(app: Express.Application) {
   });
 }
 
-// replace with checkout and return book
-// function doDeleteUser(app: Express.Application) {
-//   return (async function(req: Express.Request, res: Express.Response) {
-//     try {
-//       const { userId } = req.params;
-//       const result = await app.locals.model.remove({userId});
-//       if (!result.isOk) throw result;
-//       const response = selfResult<RegisteredUser>(req, result.val);
-//       res.json(response);
-//     }
-//     catch(err) {
-//       const mapped = mapResultErrors(err);
-//       res.status(mapped.status).json(mapped);
-//     }
-//   });
-// }
-
-// function doUpdateUser(app: Express.Application) {
-//   return (async function(req: Express.Request, res: Express.Response) {
-//     try {
-//       const { userId } = req.params;
-//       const result = await app.locals.model.update({...req.body, userId});
-//       if (!result.isOk) throw result;
-//       const response = selfResult<RegisteredUser>(req, result.val);
-//       res.json(response);
-//     }
-//     catch(err) {
-//       const mapped = mapResultErrors(err);
-//       res.status(mapped.status).json(mapped);
-//     }
-//   });
-// }
+function doCheckoutBook(app: Express.Application){
+  return async function (req: Express.Request, res: Express.Response) {
+    try {
+      const checkoutResult = await app.locals.model.checkoutBook(req.body);
+      if (!checkoutResult.isOk) throw checkoutResult;
+      res.location(selfHref(req, req.body.isbn));
+      const response = selfResult(req, checkoutResult.val, STATUS.OK);
+      res.status(STATUS.OK).json(response);
+    } 
+    catch (error) {
+      const mapped = mapResultErrors(error);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
+function doReturnBook(app: Express.Application){
+  return async function (req: Express.Request, res: Express.Response) {
+    try {
+      const { patronId, isbn } = req.body;
+      const result = await app.locals.model.returnBook({ ...req.body, isbn, patronId });
+      if (!result.isOk) throw result;
+      const response = selfResult<LendingLibrary>(req, result.val);
+      res.json(response);
+    }  
+    catch (err) {
+      const mapped = mapResultErrors(err);
+      res.status(mapped.status).json(mapped);
+    }
+  }
+}
 
 function doClear(app: Express.Application) {
   return (async function(req: Express.Request, res: Express.Response) {

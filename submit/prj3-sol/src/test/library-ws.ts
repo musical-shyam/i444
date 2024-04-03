@@ -41,7 +41,7 @@ describe('lending library web services', () => {
   });
 
 
-  describe.skip('Add Book Web Service', () => {
+  describe('Add Book Web Service', () => {
 
     const NUMERIC_FIELDS = [ 'pages', 'year', 'nCopies' ];
 
@@ -187,27 +187,45 @@ describe('lending library web services', () => {
 
   });  //describe('Add Book ...')
 
-  describe.skip('Get Book Web Service', async () => {
+  describe('Get Book Web Service', async () => {
 
     beforeEach(async () => {
       await loadAllBooks(ws);
     });
 
     it('must get a book with specified isbn', async () => {
-      assert.fail('TODO');
+      const book = BOOKS[0]; // Assuming BOOKS is an array of books
+      const isbn = book.isbn;
+      const res = await ws.get(`${BASE}/books/${isbn}`);
+      expect(res.status).to.equal(STATUS.OK);
+      expect(res.body?.isOk).to.equal(true);
     });
     
     it('must get a 404 for a book having a bad isbn', async () => {
-      assert.fail('TODO');
+      const res = await ws.get(`${BASE}/books/invalid_isbn`);
+      expect(res.status).to.equal(STATUS.NOT_FOUND);
+      expect(res.body?.isOk).to.equal(false);
     });
 
     it('must retrieve an added book from its Location header', async () => {
-      assert.fail('TODO');
+      // Adding a book using the "Add Book" web service
+      const addBookRes = await ws.put(`${BASE}/books`)
+        .set('Content-Type', 'application/json')
+        .send(BOOKS[0]); // Assuming BOOKS is an array of books
+      
+      // Asserting that the book was added successfully
+      expect(addBookRes.status).to.equal(STATUS.CREATED);
+      expect(addBookRes.body?.isOk).to.equal(true);
+      const bookLocation = addBookRes.headers.location;
+      expect(bookLocation).to.be.a('string');
+      const getBookRes = await ws.get(bookLocation);
+      expect(getBookRes.status).to.equal(STATUS.OK);
+      expect(getBookRes.body?.isOk).to.equal(true);
     });
     
   });
   
-  describe.skip('Clear Web Service', async () => {
+  describe('Clear Web Service', async () => {
 
     beforeEach(async () => {
       await loadAllBooks(ws);
@@ -230,7 +248,7 @@ describe('lending library web services', () => {
     
   });
   
-  describe.skip('Find Books Web Service', async () => {
+  describe('Find Books Web Service', async () => {
 
     beforeEach(async () => {
       await loadAllBooks(ws);
@@ -262,7 +280,14 @@ describe('lending library web services', () => {
     });
 
     it('must error on a search field with bad index/count', async () => {
-      assert.fail('TODO');
+      const search = 'a';
+      const index = 'a';
+      const count = 'b';
+      const url = urlString(`${BASE}/books`, { search, index, count });
+      const res = await ws.get(url);
+      expect(res.status).to.equal(STATUS.BAD_REQUEST);
+      expect(res.body?.isOk).to.equal(false);
+      expect(res.body.errors.length).to.be.gt(0);
     });
 
     it('must find all results', async () => {
@@ -311,7 +336,17 @@ describe('lending library web services', () => {
     });
 
     it('must find a subsequence of JavaScript books', async () => {
-      assert.fail('TODO');
+      const jsBooks = BOOKS.filter(book => book.title.includes('JavaScript'));
+    
+      // Make a request to the endpoint with the search query
+      const search = 'JavaScript';
+      const url = urlString(`${BASE}/books`, { search });
+      const res = await ws.get(url);
+      expect(res.status).to.equal(STATUS.OK);
+      expect(res.body?.isOk).to.equal(true);
+      const actualBooks = res.body.result.map((result: any) => result.result);
+      expect(actualBooks).to.have.length.above(0); // Ensure there are results
+      expect(actualBooks.every((book: any) => jsBooks.some(subBook => subBook.title === book.title))).to.be.true;
     });
 
     it('must find no results', async () => {
@@ -325,7 +360,7 @@ describe('lending library web services', () => {
     
   });
 
-  describe.skip('Checkout Book Web Service with empty library', async () => {
+  describe('Checkout Book Web Service with empty library', async () => {
 
     it('must error on missing field', async () => {
       for (const f of [ 'isbn', 'patronId' ]) {
@@ -353,7 +388,7 @@ describe('lending library web services', () => {
 
   });    
 
-  describe.skip('Checkout Book Web Service with populated library', async () => {
+  describe('Checkout Book Web Service with populated library', async () => {
     
     beforeEach(async () => {
       await loadAllBooks(ws);
@@ -397,7 +432,7 @@ describe('lending library web services', () => {
 
   });
 
-  describe.skip('Checkout and Return Book Web Services', async () => {
+  describe('Checkout and Return Book Web Services', async () => {
 
     beforeEach(async () => {
       await loadAllBooks(ws);
