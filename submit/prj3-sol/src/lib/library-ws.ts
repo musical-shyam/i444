@@ -4,6 +4,7 @@ import bodyparser from 'body-parser';
 import assert from 'assert';
 import STATUS from 'http-status';
 
+
 import { Lib, LendingLibrary, } from 'lending-library';
 import { Errors } from 'cs544-js-utils';
 import { DEFAULT_INDEX, DEFAULT_COUNT } from './params.js';
@@ -52,22 +53,70 @@ function setupRoutes(app: Express.Application) {
   //if uncommented, all requests are traced on the console
   //app.use(doTrace(app));
   
-  //set up application routes
-  //TODO: set up application routes
-  
-  
-  app.put(`${base}/:books`, doAddBook(app));
-  app.get(`${base}/books/:isbn`, doGetBook(app));
+  //application routes table
+  app.put(`${base}/books`, doAddBook(app));
+  app.put(`${base}/lendings`, doCheckoutBook(app));
   app.get(`${base}/books`, doFindBook(app));
-  app.put(`${base}/lendings`,doCheckoutBook(app));
-  app.delete(`${base}/lendings`,doReturnBook(app));
+  app.get(`${base}/books/:isbn`, doGetBook(app));
   app.delete(`${base}`, doClear(app));
+  app.delete(`${base}/lendings`, doReturnBook(app));  
+
+
   //must be last
   app.use(do404(app));  //custom handler for page not found
   app.use(doErrors(app)); //custom handler for internal errors
 }
 
-//TODO: set up route handlers
+//Route handlers
+//addbook web service
+function doAddBook(app: Express.Application) {
+  return (async function(req: Express.Request, res: Express.Response) {
+    try {
+      //calling the add books function of lending library 
+      const result = await app.locals.model.addBook(req.body);
+      // throws errors if there is any error when adding the book
+      if (!result.isOk) throw result;
+      const book = result.val;
+      const { isbn } = book;
+      // If successful, setting the location header with the URL of the newly added book
+      res.location(selfHref(req, isbn));
+      const response = selfResult(req, book, STATUS.CREATED);
+      // Responds with the CREATED status and the JSON response
+      res.status(STATUS.CREATED).json(response);
+    }
+    catch(err) {
+      const mapped = mapResultErrors(err);
+      res.status(mapped.status).json(mapped);
+    }
+  });
+}
+
+//find book web service
+function doFindBook(app: Express.Application) {
+    return (async function(req: RequestWithQuery, res: Express.Response) {
+      try {
+        const q = { ...req.query };   
+           
+        const index = Number(q.index ??  DEFAULT_INDEX);
+        const count = Number(q.count ??  DEFAULT_COUNT);
+  
+        //by requesting one extra result, we ensure that we generate the
+        //next link only if there are more than count remaining results
+        const q1 = { ...q, count: count + 1, index, };
+        
+        const result = await app.locals.model.findBooks(q1);
+        if (!result.isOk) throw result;
+        const response = pagedResult<Book>(req, 'isbn' ,result.val);
+        res.json(response);
+      }
+      catch(err) {
+        const mapped = mapResultErrors(err);
+        res.status(mapped.status).json(mapped);
+      }
+    });
+  }
+  
+//get book web service
 function doGetBook(app: Express.Application) {
   return (async function(req: Express.Request, res: Express.Response) {
     try {
@@ -84,79 +133,7 @@ function doGetBook(app: Express.Application) {
   });
 }
 
-function doAddBook(app: Express.Application) {
-  return (async function(req: Express.Request, res: Express.Response) {
-    try {
-      const result = await app.locals.model.addBook(req.body);
-      if (!result.isOk) throw result;
-      const book = result.val;
-      const { isbn } = book;
-      res.location(selfHref(req, isbn));
-      const response = selfResult(req, book, STATUS.CREATED);
-      res.status(STATUS.CREATED).json(response);
-    }
-    catch(err) {
-      const mapped = mapResultErrors(err);
-      res.status(mapped.status).json(mapped);
-    }
-  });
-}
-
-function doFindBook(app: Express.Application) {
-  return (async function(req: RequestWithQuery, res: Express.Response) {
-    try {
-      const q = { ...req.query };   
-         
-      const index = Number(q.index ??  DEFAULT_INDEX);
-      const count = Number(q.count ??  DEFAULT_COUNT);
-
-      //by requesting one extra result, we ensure that we generate the
-      //next link only if there are more than count remaining results
-      const q1 = { ...q, count: count + 1, index, };
-      
-      const result = await app.locals.model.findBooks(q1);
-      if (!result.isOk) throw result;
-      const response = pagedResult<Book>(req, 'isbn' ,result.val);
-      res.json(response);
-    }
-    catch(err) {
-      const mapped = mapResultErrors(err);
-      res.status(mapped.status).json(mapped);
-    }
-  });
-}
-
-function doCheckoutBook(app: Express.Application){
-  return async function (req: Express.Request, res: Express.Response) {
-    try {
-      const checkoutResult = await app.locals.model.checkoutBook(req.body);
-      if (!checkoutResult.isOk) throw checkoutResult;
-      res.location(selfHref(req, req.body.isbn));
-      const response = selfResult(req, checkoutResult.val, STATUS.OK);
-      res.status(STATUS.OK).json(response);
-    } 
-    catch (error) {
-      const mapped = mapResultErrors(error);
-      res.status(mapped.status).json(mapped);
-    }
-  }
-}
-function doReturnBook(app: Express.Application){
-  return async function (req: Express.Request, res: Express.Response) {
-    try {
-      const { patronId, isbn } = req.body;
-      const result = await app.locals.model.returnBook({ ...req.body, isbn, patronId });
-      if (!result.isOk) throw result;
-      const response = selfResult<LendingLibrary>(req, result.val);
-      res.json(response);
-    }  
-    catch (err) {
-      const mapped = mapResultErrors(err);
-      res.status(mapped.status).json(mapped);
-    }
-  }
-}
-
+//clear books web service
 function doClear(app: Express.Application) {
   return (async function(req: Express.Request, res: Express.Response) {
     try {
@@ -170,7 +147,41 @@ function doClear(app: Express.Application) {
     }
   });
 }
-
+// checkout book web service
+function doCheckoutBook(app: Express.Application){
+  return (async function (req: Express.Request, res: Express.Response) {
+    try {
+      // Call the checkoutBook service provided by app.locals.model
+      const checkoutResult = await app.locals.model.checkoutBook(req.body);
+      if (!checkoutResult.isOk) {throw checkoutResult;}
+      
+      res.location(selfHref(req, req.body.isbn));
+      const response = selfResult(req, checkoutResult.val);
+      res.status(STATUS.OK).json(response);
+    } 
+    catch (err) {
+      const mapped = mapResultErrors(err);
+      res.status(mapped.status).json(mapped);
+    }
+  });
+}
+//return book web service
+function doReturnBook(app: Express.Application){
+  return (async function (req: Express.Request, res: Express.Response) {
+    try {
+      const { patronId, isbn } = req.body;
+      // Call the returnbook service provided by app.locals.model
+      const result = await app.locals.model.returnBook({ ...req.body, isbn, patronId });
+      if (!result.isOk) throw result;
+      const response = selfResult(req, result.val);
+      res.json(response);
+    }  
+    catch (err) {
+      const mapped = mapResultErrors(err);
+      res.status(mapped.status).json(mapped);
+    }
+  });
+}
 /** log request on stdout */
 function doTrace(app: Express.Application) {
   return (async function(req: Express.Request, res: Express.Response, 
@@ -212,6 +223,7 @@ function doErrors(app: Express.Application) {
     if (status === STATUS.INTERNAL_SERVER_ERROR) console.error(result.errors);
   };
 }
+
 
 
 
