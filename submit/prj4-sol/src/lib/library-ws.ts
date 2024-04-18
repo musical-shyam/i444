@@ -26,7 +26,8 @@ export class LibraryWs {
   async getBookByUrl(bookUrl: URL|string)
     : Promise<Errors.Result<SuccessEnvelope<Lib.XBook>>>
   {
-    return Errors.errResult('TODO');
+    return getEnvelope<Lib.XBook, SuccessEnvelope<Lib.XBook>>(bookUrl);
+    //return Errors.errResult('TODO');
   }
 
   /** given an absolute url findUrl ending with /books with query
@@ -36,7 +37,8 @@ export class LibraryWs {
   async findBooksByUrl(findUrl: URL|string)
     : Promise<Errors.Result<PagedEnvelope<Lib.XBook>>>
   {
-    return Errors.errResult('TODO');
+    return getEnvelope<Lib.XBook, PagedEnvelope<Lib.XBook>>(findUrl);
+    //return Errors.errResult('TODO');
   }
 
   /** check out book specified by lend */
