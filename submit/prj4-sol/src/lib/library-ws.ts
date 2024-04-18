@@ -26,7 +26,7 @@ export class LibraryWs {
   async getBookByUrl(bookUrl: URL|string)
     : Promise<Errors.Result<SuccessEnvelope<Lib.XBook>>>
   {
-    return getEnvelope<Lib.XBook, SuccessEnvelope<Lib.XBook>>(bookUrl);
+    return getEnvelope<Lib.XBook, SuccessEnvelope<Lib.XBook>>(bookUrl); 
     //return Errors.errResult('TODO');
   }
 
@@ -44,21 +44,63 @@ export class LibraryWs {
   /** check out book specified by lend */
   //make a PUT request to /lendings
   async checkoutBook(lend: Lib.Lend) : Promise<Errors.Result<void>> {
-    return Errors.errResult('TODO');
+    return this.sendBookRequest('/api/lendings', 'PUT', lend); //diverting to common method(check below)
   }
 
   /** return book specified by lend */
   //make a DELETE request to /lendings
   async returnBook(lend: Lib.Lend) : Promise<Errors.Result<void>> {
-    return Errors.errResult('TODO');
+    return this.sendBookRequest('/api/lendings', 'DELETE', lend); // diverting to common method
   }
 
   /** return Lend[] of all lendings for isbn. */
   //make a GET request to /lendings with query-params set
   //to { findBy: 'isbn', isbn }.
   async getLends(isbn: string) : Promise<Errors.Result<Lib.Lend[]>> {
-    return Errors.errResult('TODO');
+    const url = new URL(`${this.url}/api/lendings`);
+    url.searchParams.set('findBy', 'isbn');
+    url.searchParams.set('isbn', isbn);
+
+    try {
+        const response = await fetch(url.toString()); // Convert URL object to string for fetch
+        const data = await response.json(); // Parse the JSON from the response
+
+        if (!response.ok) {
+            throw new Error(data?.message || 'Failed to fetch lendings');
+        }
+
+        if (data.isOk) {
+            return Errors.okResult(data.result); // Assuming data.result contains the array of Lends
+        } else {
+            return new Errors.ErrResult(data.errors as Errors.Err[]); // Handling ErrorEnvelope
+        }
+    } catch (err) {
+        console.error('Error fetching lending data:', err);
+        return Errors.errResult(err); // Convert exceptions into an error result
+    }
   }
+  //the method for interacting with lend 
+  //sends either put or delete request to /lendings
+  private async sendBookRequest(endpoint: string, method: 'PUT' | 'DELETE', data: object): Promise<Errors.Result<void>> {
+    const url = `${this.url}${endpoint}`;
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const responseData = await response.json();
+        
+        if (responseData.isOk) {
+            return Errors.VOID_RESULT;
+        } else {
+            return new Errors.ErrResult(responseData.errors as Errors.Err[]);
+        }
+    } catch (error) {
+        console.error(`${method} ${url}: error`, error);
+        return Errors.errResult(error);
+    }
+}
 
 
 }
