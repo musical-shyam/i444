@@ -35,8 +35,6 @@ class App {
   }
   
   //TODO: add private methods as needed
-  //call table: handleSearchBlur() --> fetchSearchResults
-
   //this function is used for handling the search words continuously
   private handleSearchBlur() {
     const searchUrl = makeQueryUrl(this.wsUrl + '/api/books', { search: this.search.value });
@@ -190,17 +188,17 @@ class App {
 
     // Create label and input for Patron ID
     const label = makeElement('label', {for: 'patronId'}, 'Patron ID');
+    const breakTag = makeElement('br');
+    const breakTag2 = makeElement('br');
     const input = makeElement('input', {id: 'patronId', type: 'text', name: 'patronId'});
     const errorSpan = makeElement('span', {class: 'error', id: 'patronId-error'});
-
+    const box  = makeElement('span',{},input, breakTag, errorSpan, breakTag2);
     // Create the submit button
     const button = makeElement('button', {type: 'submit'}, 'Checkout Book');
 
     // Appending label, input, error message span, and button to the form
     form.appendChild(label);
-    form.appendChild(input);
-    form.appendChild(errorSpan);
-    form.appendChild(button);
+    form.appendChild(makeElement('span',{},box,makeElement('br'),button));
 
     // Append the form to the result container
     this.result.appendChild(form);
@@ -209,8 +207,6 @@ class App {
       event.preventDefault(); // Prevent the default form submission behavior
       const patronId = (document.getElementById('patronId') as HTMLInputElement).value.trim();
       console.log("Attempting to checkout book:", isbn, "for patron:", patronId);
-      // Here you would call another method to perform the actual checkout using the isbn and patronId
-      // For example: this.ws.checkoutBook({ isbn, patronId });
   }
   private async updateBorrowersDisplay(isbn: string) {
     const result = await this.ws.getLends(isbn);
@@ -237,7 +233,7 @@ class App {
         });
         borrowersElement.appendChild(ul);
     } else if (result.isOk) {
-        borrowersElement.textContent = 'None'; // Display 'None' if no lendings
+        borrowersElement.textContent = 'None'; // Displaying 'None' if no lendings
     } else {
         this.unwrap(result); // Handle errors
     }
