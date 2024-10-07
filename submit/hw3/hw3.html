@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Homework  3</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <script type="text/javascript"
+          src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js">
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+    <link href="../../assets/styles/article.css" rel="stylesheet" type="text/css" /> 
+</head>
+
+<body class=umt-article>
+    <nav id="course-nav">
+      <ul>
+      </ul>
+    </nav>
+
+    <div class="umt-content">
+      <div><section data-level="h1"><h1>Homework  3</h1><p><strong>Due</strong>: 4/19 before midnight;				<strong>Max. Points</strong>: 100 <br>
+<strong>No late submissions</strong>
+</p><p>To be turned in as a <strong>single PDF</strong> via submission link on gradescope.
+Specifically, when you access the submission link on gradescope, you
+will need to upload a single PDF and indicate the page within your
+upload where your answer to each question is located.
+</p><p><strong>Important Reminder</strong>: As per the course
+
+<a href="../../misc/academic-honesty/academic-honesty-policy.html">Academic Honesty Policy</a>, cheating of any kind will minimally
+result in your letter grade for the entire course being reduced by one
+level.
+</p><p><strong>Please justify all answers</strong>.
+</p><p><strong>It may be the case that some questions cannot be answered as
+ requested.</strong>
+</p><ol><li><p>Speculate on how the TypeScript playground implements links to
+    programs typed in by its users.  For example, the following
+    
+    <a href="https://www.typescriptlang.org/play?#code/PTAqGUAIEMBsHMCmAjATtAlgY0gE2gC7SQECeADogM6QBmA9qnvQLaYB2kL9uissGdvACwAKDEgqAVxYkKiMWUqQACtFItE7AqHmQAvJADkAYQCC4ABJHIAH2PmASgBEb905YCiJgNJGA3GJBokqIkABC0FSIahpaBAaQAN6QANaCuABcquqa2rrKAL6BIXom0Ki4BWGGRgCyUQSIqOWVbsYAahhU0AHBIIJNqNFYBBj0nNDsuJDkqDxSo3KUVIplqIi4GAStM4aR0bF5CQBkyWKQaRnZpmYuRgA0F5BYFVXy2bvVT6KXr5UAORkyGa2SoBFQghEomKwVCkBMAAtEFhUokDjFcvFICdnkksMjUUCWCDUNl2MDmpBCjjkulpjcTF5fI9qSU1spylREeiopi4tpaUl6VkHBZrA82f1gNJZKEOWEjvE6ogCIieIkTBstjs3nYEYS0fYuYj2aIQHMFkt5aVlErBYYkpo1TxsvaCCqXbhJdBuFJtOTKahYeJzcAAHQARnDEmAADcKngUbAKoRxuwxFgJuCXlFEe63ViHedflxVerRcLrmKrEZCj9Lr76P6CNlIwBOcMAJi7PxDsYTTF4WBT6DGE0z2YSBNSBZyAoSjuezor2SrDIczL8koJKNSxNJbYADEfI-Xnk2W9kACwAZi73d7Yn7ofhjmoUlgi7xkHBhCkVBghCULUkKkDdJ4qDzGSdBwNEoG2D+mhUD0SBAZCQigWcKQQVBjDZBCUhhC+w6jmEtD+qM6azOoAAU5BFq287HAAlJA2TvtIX5mkAA">link</a> accesses the ADT example used in the
+    
+    <a href="../../slides/js-ts-overview/js-ts-overview.html">JavaScript/TypeScript Overview</a> slides to illustrate the use of
+    TypeScript for modeling. <em>5-points</em>
+</p></li><li><p>A programming library needs to export a large object to its
+    clients.  This object contains a property whose value is sensitive
+    and should not be exposed to clients.  Unfortunately other
+    constraints make it impossible for the library to export another
+    copy of the object without a sensitive property.
+</p><p>    How can the library set up the property in the object so as to be
+    able to export the object to clients while making it impossible
+    for clients to access that property within JavaScript. <em>10-points</em>
+</p></li><li><p>The <em>RE</em> in <em>REST</em> stands for <em>REpresentational</em>.  Discuss the suitability
+    of using HTML as a representational format for a REST API.  Specifically,
+</p><ol><li><p>Discuss how each JSON data type can be mapped into HTML.
+        For each mapping, identify whether the mapping is natural
+	or forced.
+</p></li><li><p>Discuss how well HTML supports HATEOAS compared to JSON. <em>15-points</em>
+</p></li></ol></li><li><p>A restaurant chain is building web services to support its
+    business.  The requirements state that the web services support
+    the following:
+</p><ol><li><p>Searching for restaurants in the chain.
+</p></li><li><p>Making a reservation at a particular reservation.
+</p></li><li><p>Searching for reservations.
+</p></li><li><p>Modifying an existing reservation.
+</p></li><li><p>Canceling a reservation.
+</p></li></ol><p>    For this proposed system, spec-out each of the above web services
+    using a <strong>REST</strong>ful approach.  For each service discuss:
+</p><ul><li><p>Suitable HTTP methods.
+</p></li><li><p>Possible URLs for that service.
+</p></li><li><p>A description of the input parameters for the service,
+	     including whether those parameters would be specified as
+	     query parameters or in the request body.
+</p></li><li><p>A description of the response, including links which can
+             be included in the output in order to implement HATEOS.
+</p></li><li><p>Caching considerations.
+</p></li></ul><p>    [Caching should be covered in class on Monday]. <em>20-points</em>
+</p></li><li><p>Discuss which HTML control you would use for each of the following
+    form controls:
+</p><ol><li><p>A control which allows the user to specify the percentage
+        of children within a school district who are classified
+	as <em>special needs</em> children.
+</p></li><li><p>A control which allows the user to schedule the date and time
+        for a pickup for a ride service like Uber.
+</p></li><li><p>A control which allows the user to specify the name
+        of a New York City Borough.
+</p></li><li><p>A control which allows the user to select an arbitrary color.
+</p></li><li><p>A control which allows the user to select several predefined
+        colors to be mixed together.
+</p></li></ol><p>    Your answers should:
+</p><ul><li><p>Be set up to maximally constrain the user's input to legal
+        values and minimize the opportunity for error.
+</p></li><li><p>Specify at most a single HTML control for each of the above
+        and should provide the actual HTML code for each control (if a
+        control allows only certain discrete values not specified
+        above, then your HTML code can contain some typical values).
+</p></li><li><p>If there are multiple candidates for a specific control,
+        discuss the trade-offs between the candidates. <em>20-points</em>
+</p></li></ul></li><li><p>Given the following HTML fragment:
+</p><pre class="hljs language-html">     &lt;table id=&quot;day-pressures&quot;>
+       &lt;tr>
+         &lt;th class=&quot;time&quot;>Time&lt;/th>
+	 &lt;th class=&quot;mercury&quot;>Mercury (Inches)&lt;/th>
+	 &lt;th class=&quot;psi&quot;>PSI&lt;/th>
+       &lt;/tr>
+       &lt;tr class=&quot;morning&quot;>
+         &lt;td class=&quot;time&quot;>08:00&lt;/td>
+	 &lt;td class=&quot;mercury&quot;>29.921 in&lt;/td>
+	 &lt;td class=&quot;psi&quot;>14.696 psi&lt;/td>
+       &lt;/tr>
+       &lt;tr class=&quot;afternoon&quot;>
+         &lt;td class=&quot;time&quot;>13:00&lt;/td>
+	 &lt;td class=&quot;mercury&quot;>30.12 in &lt;/td>
+	 &lt;td class=&quot;psi&quot;>14.793 psi&lt;/td>
+       &lt;/tr>
+       &lt;tr class=&quot;evening&quot;>
+         &lt;td class=&quot;time&quot;>18:00&lt;/td>
+	 &lt;td class=&quot;mercury&quot;>30.164 in&lt;/td>
+	 &lt;td class=&quot;psi&quot;>14.815 psi&lt;/td>
+       &lt;/tr>
+     &lt;/table>
+</pre><p>    For each of the following, provide a JavaScript function which
+    take a single <code>id</code> argument specifying the id of a table formatted
+    as above and returns:
+</p><ol><li><p>The <code>&lt;tr></code> DOM element for the afternoon row.
+</p></li><li><p>The <code>&lt;td></code> DOM element for the afternoon mercury pressure.
+</p></li><li><p>The JavaScript <code>Number</code> giving the value for the
+        afternoon mercury pressure.
+</p></li><li><p>A JavaScript list containing all the mercury pressure <code>Number</code> values.
+</p></li><li><p>A JavaScript array containing all the <code>&lt;td></code> DOM elements 
+        for the afternoon row.
+</p></li></ol><p>    <strong>Hint</strong>: consider using <code>querySelector()</code> and <code>querySelectorAll()</code>.
+     <em>15-points</em>
+</p></li><li><p>With modern web applications, it is preferable to validate all
+    user input as soon as possible once a user provides the input.
+    Discuss how you would validate each of the following user inputs:
+</p><ol><li><p>A US zipcode.
+</p></li><li><p>A US address.
+</p></li><li><p>A credit card number.
+</p></li></ol><p>    Your answer should provide:
+</p><ul><li><p>The details of the validation performed.
+</p></li><li><p>The DOM events you would use to trigger validation.
+</p></li><li><p>A discussion of what validations can be performed within a browser
+        and which validations should be performed on the server.
+</p></li></ul><p>    <strong>Hint</strong>: Do a web search to understand the necessary validation
+    requirements. <em>15-points</em>
+</p></li></ol></section></div>
+    </div>
+
+    <script type="module" src="../../assets/scripts/slide-controls.mjs"></script>
+    <script type="module" src="../../assets/scripts/nav.mjs"></script> 
+    <script type="module" src="../../assets/scripts/highlight.mjs"></script>
+</body>
+</html>
+

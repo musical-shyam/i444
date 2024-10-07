@@ -1,0 +1,187 @@
+  		          H o m e w o r k   3   
+
+*Due*: 4/19 before midnight;				*Max. Points*: 100 .;
+*No late submissions*
+
+To be turned in as a *single PDF* via submission link on gradescope.
+Specifically, when you access the submission link on gradescope, you
+will need to upload a single PDF and indicate the page within your
+upload where your answer to each question is located.
+
+*Important Reminder*: As per the course
+.<../../misc/academic-honesty/academic-honesty-policy.html>
+"Academic Honesty Policy", cheating of any kind will minimally
+result in your letter grade for the entire course being reduced by one
+level.
+
+*Please justify all answers*.
+
+*It may be the case that some questions cannot be answered as
+ requested.*
+
+  # Speculate on how the TypeScript playground implements links to
+    programs typed in by its users.  For example, the following
+    .<https://www.typescriptlang.org/play?#code/PTAqGUAIEMBsHMCmAjATtAlgY0gE2gC7SQECeADogM6QBmA9qnvQLaYB2kL9uissGdvACwAKDEgqAVxYkKiMWUqQACtFItE7AqHmQAvJADkAYQCC4ABJHIAH2PmASgBEb905YCiJgNJGA3GJBokqIkABC0FSIahpaBAaQAN6QANaCuABcquqa2rrKAL6BIXom0Ki4BWGGRgCyUQSIqOWVbsYAahhU0AHBIIJNqNFYBBj0nNDsuJDkqDxSo3KUVIplqIi4GAStM4aR0bF5CQBkyWKQaRnZpmYuRgA0F5BYFVXy2bvVT6KXr5UAORkyGa2SoBFQghEomKwVCkBMAAtEFhUokDjFcvFICdnkksMjUUCWCDUNl2MDmpBCjjkulpjcTF5fI9qSU1spylREeiopi4tpaUl6VkHBZrA82f1gNJZKEOWEjvE6ogCIieIkTBstjs3nYEYS0fYuYj2aIQHMFkt5aVlErBYYkpo1TxsvaCCqXbhJdBuFJtOTKahYeJzcAAHQARnDEmAADcKngUbAKoRxuwxFgJuCXlFEe63ViHedflxVerRcLrmKrEZCj9Lr76P6CNlIwBOcMAJi7PxDsYTTF4WBT6DGE0z2YSBNSBZyAoSjuezor2SrDIczL8koJKNSxNJbYADEfI-Xnk2W9kACwAZi73d7Yn7ofhjmoUlgi7xkHBhCkVBghCULUkKkDdJ4qDzGSdBwNEoG2D+mhUD0SBAZCQigWcKQQVBjDZBCUhhC+w6jmEtD+qM6azOoAAU5BFq287HAAlJA2TvtIX5mkAA>
+    link accesses the ADT example used in the
+    .<../../slides/js-ts-overview/js-ts-overview.html>
+    "JavaScript/TypeScript Overview" slides to illustrate the use of
+    TypeScript for modeling. "5-points"
+
+ 
+  # A programming library needs to export a large object to its
+    clients.  This object contains a property whose value is sensitive
+    and should not be exposed to clients.  Unfortunately other
+    constraints make it impossible for the library to export another
+    copy of the object without a sensitive property.
+
+    How can the library set up the property in the object so as to be
+    able to export the object to clients while making it impossible
+    for clients to access that property within JavaScript. "10-points"
+
+
+  # The "RE" in "REST" stands for "REpresentational".  Discuss the suitability
+    of using HTML as a representational format for a REST API.  Specifically,
+
+      # Discuss how each JSON data type can be mapped into HTML.
+        For each mapping, identify whether the mapping is natural
+	or forced.
+
+      # Discuss how well HTML supports HATEOAS compared to JSON. "15-points"
+
+
+  # A restaurant chain is building web services to support its
+    business.  The requirements state that the web services support
+    the following:
+
+      # Searching for restaurants in the chain.
+
+      # Making a reservation at a particular reservation.
+
+      # Searching for reservations.
+
+      # Modifying an existing reservation.
+
+      # Canceling a reservation.
+
+
+    For this proposed system, spec-out each of the above web services
+    using a *REST*ful approach.  For each service discuss:
+
+           + Suitable HTTP methods.
+
+           + Possible URLs for that service.
+
+           + A description of the input parameters for the service,
+	     including whether those parameters would be specified as
+	     query parameters or in the request body.
+
+           + A description of the response, including links which can
+             be included in the output in order to implement HATEOS.
+
+           + Caching considerations.
+
+    [Caching should be covered in class on Monday]. "20-points"
+
+  # Discuss which HTML control you would use for each of the following
+    form controls:
+
+      # A control which allows the user to specify the percentage
+        of children within a school district who are classified
+	as "special needs" children.
+
+      # A control which allows the user to schedule the date and time
+        for a pickup for a ride service like Uber.
+
+      # A control which allows the user to specify the name
+        of a New York City Borough.
+
+      # A control which allows the user to select an arbitrary color.
+
+      # A control which allows the user to select several predefined
+        colors to be mixed together.
+
+    Your answers should:
+
+      + Be set up to maximally constrain the user's input to legal
+        values and minimize the opportunity for error.
+
+      + Specify at most a single HTML control for each of the above
+        and should provide the actual HTML code for each control (if a
+        control allows only certain discrete values not specified
+        above, then your HTML code can contain some typical values).
+
+      + If there are multiple candidates for a specific control,
+        discuss the trade-offs between the candidates. "20-points"
+
+    
+  # Given the following HTML fragment:
+
+     .code(lang=html)
+     ~~~
+     <table id="day-pressures">
+       <tr>
+         <th class="time">Time</th>
+	 <th class="mercury">Mercury (Inches)</th>
+	 <th class="psi">PSI</th>
+       </tr>
+       <tr class="morning">
+         <td class="time">08:00</td>
+	 <td class="mercury">29.921 in</td>
+	 <td class="psi">14.696 psi</td>
+       </tr>
+       <tr class="afternoon">
+         <td class="time">13:00</td>
+	 <td class="mercury">30.12 in </td>
+	 <td class="psi">14.793 psi</td>
+       </tr>
+       <tr class="evening">
+         <td class="time">18:00</td>
+	 <td class="mercury">30.164 in</td>
+	 <td class="psi">14.815 psi</td>
+       </tr>
+     </table>
+     ~~~
+
+    For each of the following, provide a JavaScript function which
+    take a single `id` argument specifying the id of a table formatted
+    as above and returns:
+
+      # The `<tr>` DOM element for the afternoon row.
+
+      # The `<td>` DOM element for the afternoon mercury pressure.
+
+      # The JavaScript `Number` giving the value for the
+        afternoon mercury pressure.
+
+      # A JavaScript list containing all the mercury pressure `Number` values.
+
+      # A JavaScript array containing all the `<td>` DOM elements 
+        for the afternoon row.
+
+    *Hint*: consider using `querySelector()` and `querySelectorAll()`.
+     "15-points"
+
+
+  # With modern web applications, it is preferable to validate all
+    user input as soon as possible once a user provides the input.
+    Discuss how you would validate each of the following user inputs:
+
+      # A US zipcode.
+
+      # A US address.
+
+      # A credit card number.
+
+    Your answer should provide:
+
+      + The details of the validation performed.
+
+      + The DOM events you would use to trigger validation.
+
+      + A discussion of what validations can be performed within a browser
+        and which validations should be performed on the server.
+
+    *Hint*: Do a web search to understand the necessary validation
+    requirements. "15-points"
+
+
